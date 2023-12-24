@@ -19,6 +19,25 @@ export const validatePasswordSignUp = async (
   }
 };
 
+export const checkEmailInUse = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const existingProfile = await CommonProfile.findOne({
+      email: req.body.email,
+    });
+    if (existingProfile) {
+      res.statusCode = 400;
+      next("Email already in use");
+    }
+    next();
+  } catch (e) {
+    res.send(e);
+  }
+};
+
 export const validateLogin = async (
   req: Request,
   res: Response,
