@@ -2,6 +2,53 @@ import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { USER_ROLES } from "@/constants/users";
 
+const RoleBasedFields = {
+  // Sole proprietor (SP), agent, client
+  sales: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Sale",
+      },
+    ],
+    default: undefined,
+  },
+  // SP, agent, manager
+  properties: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Property",
+      },
+    ],
+    default: undefined,
+  },
+  // SP, agent
+  clients: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Client",
+      },
+    ],
+    default: undefined,
+  },
+  // Manager
+  agents: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Agent",
+      },
+    ],
+  },
+  // Agent
+  licenseNumber: {
+    type: String,
+    unique: true,
+  },
+};
+
 const UserSchema = new Schema({
   email: String,
   password: String,
@@ -35,35 +82,7 @@ const UserSchema = new Schema({
       values: USER_ROLES,
     },
   },
-  // Role-specific fields
-  // Default undefined is needed to prevent fields from saving in a doc
-  sales: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Sale",
-      },
-    ],
-    default: undefined,
-  },
-  properties: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Property",
-      },
-    ],
-    default: undefined,
-  },
-  clients: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Client",
-      },
-    ],
-    default: undefined,
-  },
+  ...RoleBasedFields,
 });
 
 UserSchema.pre("save", function (next) {
