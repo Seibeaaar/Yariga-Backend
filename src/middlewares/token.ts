@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { omit } from "lodash";
 import User from "@/models/User";
 
 export const verifyJWToken = async (
@@ -54,7 +53,7 @@ export const extractProfileFromToken = async (
     }
     res.locals = {
       ...res.locals,
-      profile: omit(profile!.toObject(), "password"),
+      profile,
     };
     next();
   } catch (e) {

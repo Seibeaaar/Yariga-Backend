@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import User from "@/models/User";
-import { LOGIN_SCHEMA } from "@/validators/auth";
+import {
+  LOGIN_VALIDATION_SCHEMA,
+  SIGN_UP_VALIDATION_SCHEMA,
+  POST_AUTH_VALIDATION_SCHEMA,
+} from "@/validators/auth";
 
 export const validatePasswordSignUp = async (
   req: Request,
@@ -9,10 +13,7 @@ export const validatePasswordSignUp = async (
   next: NextFunction,
 ) => {
   try {
-    await User.validate(req.body);
-    if (!req.body.password) {
-      next("Password is required");
-    }
+    await SIGN_UP_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
     res.status(400).send(e);
@@ -44,7 +45,7 @@ export const validateLogin = async (
   next: NextFunction,
 ) => {
   try {
-    await LOGIN_SCHEMA.validate(req.body);
+    await LOGIN_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
     res.status(400).send(e);
@@ -79,5 +80,18 @@ export const validateUserCredentials = async (
     next();
   } catch (e) {
     res.send(e);
+  }
+};
+
+export const validateProfileCompletion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
+    next();
+  } catch (e) {
+    res.status(400).send(e);
   }
 };

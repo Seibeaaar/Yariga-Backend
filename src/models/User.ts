@@ -1,73 +1,20 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-import {
-  validateEmail,
-  validateFirstName,
-  validateLastName,
-  validatePassword,
-  validatePhoneNumber,
-  validateDateOfBirth,
-  validateTaxNumber,
-} from "@/validators/common";
 import { USER_ROLES } from "@/constants/users";
 
 const UserSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    validate: {
-      validator: validateEmail,
-      message: "Invalid email",
-    },
-  },
-  password: {
-    type: String,
-    validate: {
-      validator: validatePassword,
-      message: "Invalid password format",
-    },
-  },
-  firstName: {
-    type: String,
-    required: true,
-    validate: {
-      validator: validateFirstName,
-      message: "Invalid first name",
-    },
-  },
-  lastName: {
-    type: String,
-    required: true,
-    validate: {
-      validator: validateLastName,
-      message: "Invalid last name",
-    },
-  },
-  phoneNumber: {
-    type: String,
-    validate: {
-      validator: validatePhoneNumber,
-      message: "Invalid phone number",
-    },
-  },
-  dateOfBirth: {
-    type: String,
-    validate: {
-      validator: validateDateOfBirth,
-      message: "You must be older than 18 years old",
-    },
-  },
+  email: String,
+  password: String,
+  firstName: String,
+  lastName: String,
+  phoneNumber: String,
+  dateOfBirth: String,
   taxNumber: {
     type: String,
-    validate: {
-      validator: validateTaxNumber,
-      message: "Invalid tax number",
-    },
+    unique: true,
+    default: undefined,
   },
-  avatar: {
-    type: String,
-  },
+  avatar: String,
   joinedAt: {
     type: String,
     default: new Date().toISOString(),
@@ -88,6 +35,35 @@ const UserSchema = new Schema({
       values: USER_ROLES,
     },
   },
+  // Role-specific fields
+  // Default undefined is needed to prevent fields from saving in a doc
+  sales: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Sale",
+      },
+    ],
+    default: undefined,
+  },
+  properties: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Property",
+      },
+    ],
+    default: undefined,
+  },
+  clients: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Client",
+      },
+    ],
+    default: undefined,
+  },
 });
 
 UserSchema.pre("save", function (next) {
@@ -99,4 +75,4 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
-export default model("CommonProfile", UserSchema);
+export default model("User", UserSchema);
