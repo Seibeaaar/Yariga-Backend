@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import CommonProfile from "@/models/CommonProfile";
+import User from "@/models/User";
 import { LOGIN_SCHEMA } from "@/validators/auth";
 
 export const validatePasswordSignUp = async (
@@ -9,7 +9,7 @@ export const validatePasswordSignUp = async (
   next: NextFunction,
 ) => {
   try {
-    await CommonProfile.validate(req.body);
+    await User.validate(req.body);
     if (!req.body.password) {
       next("Password is required");
     }
@@ -25,7 +25,7 @@ export const checkEmailInUse = async (
   next: NextFunction,
 ) => {
   try {
-    const existingProfile = await CommonProfile.findOne({
+    const existingProfile = await User.findOne({
       email: req.body.email,
     });
     if (existingProfile) {
@@ -57,7 +57,7 @@ export const validateUserCredentials = async (
   next: NextFunction,
 ) => {
   try {
-    const profile = await CommonProfile.findOne({ email: req.body.email });
+    const profile = await User.findOne({ email: req.body.email });
     if (!profile) {
       res.statusCode = 400;
       next("No user found with such credentials");
