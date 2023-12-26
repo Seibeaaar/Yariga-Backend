@@ -11,7 +11,7 @@ import {
 } from "@/validators/common";
 import { USER_ROLES } from "@/constants/users";
 
-const CommonProfileSchema = new Schema({
+const UserSchema = new Schema({
   email: {
     type: String,
     required: true,
@@ -90,7 +90,7 @@ const CommonProfileSchema = new Schema({
   },
 });
 
-CommonProfileSchema.pre("save", function (next) {
+UserSchema.pre("save", function (next) {
   if (!this.password) {
     next();
   }
@@ -99,4 +99,4 @@ CommonProfileSchema.pre("save", function (next) {
   next();
 });
 
-export default model("CommonProfile", CommonProfileSchema);
+export default model("CommonProfile", UserSchema);

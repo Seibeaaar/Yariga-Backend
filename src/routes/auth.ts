@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { omit } from "lodash";
 
-import CommonProfile from "@/models/CommonProfile";
+import User from "@/models/User";
 import { signJWToken } from "@/utils/auth";
 import {
   validatePasswordSignUp,
@@ -19,7 +19,7 @@ AuthRouter.post(
   checkEmailInUse,
   async (req, res) => {
     try {
-      const profile = new CommonProfile(req.body);
+      const profile = new User(req.body);
       await profile.save();
       const token = signJWToken(profile.id);
       res.status(201).send({

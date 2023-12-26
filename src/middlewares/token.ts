@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { omit } from "lodash";
-import CommonProfile from "@/models/CommonProfile";
+import User from "@/models/User";
 
 export const verifyJWToken = async (
   req: Request,
@@ -47,7 +47,7 @@ export const extractProfileFromToken = async (
       res.statusCode = 401;
       next("No token provided");
     }
-    const profile = await CommonProfile.findById(token.data);
+    const profile = await User.findById(token.data);
     if (!profile) {
       res.statusCode = 400;
       next(`No profile with ID ${token.data} found`);
