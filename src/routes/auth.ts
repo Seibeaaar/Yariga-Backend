@@ -9,7 +9,7 @@ import {
   validateUserCredentials,
   checkEmailInUse,
 } from "@/middlewares/auth";
-import { COMMON_SERVER_ERROR } from "@/constants/server";
+import { generateErrorMesaage } from "@/utils/common";
 
 const AuthRouter = Router();
 
@@ -27,7 +27,8 @@ AuthRouter.post(
         profile: omit(profile.toObject(), "password"),
       });
     } catch (e) {
-      res.status(500).send(COMMON_SERVER_ERROR);
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
     }
   },
 );
@@ -45,7 +46,8 @@ AuthRouter.post(
         profile: omit(profile.toObject(), "password"),
       });
     } catch (e) {
-      res.status(500).send(COMMON_SERVER_ERROR);
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
     }
   },
 );

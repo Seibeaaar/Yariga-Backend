@@ -4,8 +4,7 @@ import User from "@/models/User";
 import { USER_ROLE } from "@/enums/user";
 import { validateProfileCompletion } from "@/middlewares/auth";
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
-
-import { COMMON_SERVER_ERROR } from "@/constants/server";
+import { generateErrorMesaage } from "@/utils/common";
 
 const SolePropRouter = Router();
 
@@ -32,7 +31,8 @@ SolePropRouter.post(
       );
       res.status(201).send(omit(updatedProfile?.toObject(), "password"));
     } catch (e) {
-      res.status(500).send(COMMON_SERVER_ERROR);
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
     }
   },
 );
