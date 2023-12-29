@@ -41,11 +41,13 @@ const RoleBasedFields = {
         ref: "Agent",
       },
     ],
+    default: undefined,
   },
   // Agent
   licenseNumber: {
     type: String,
     unique: true,
+    default: undefined,
   },
 };
 

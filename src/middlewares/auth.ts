@@ -6,6 +6,8 @@ import {
   SIGN_UP_VALIDATION_SCHEMA,
   POST_AUTH_VALIDATION_SCHEMA,
 } from "@/validators/auth";
+import { validateSellerInformation } from "@/validators/auth";
+import { generateErrorMesaage } from "@/utils/common";
 
 export const validatePasswordSignUp = async (
   req: Request,
@@ -16,7 +18,8 @@ export const validatePasswordSignUp = async (
     await SIGN_UP_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
-    res.status(400).send(e);
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };
 
@@ -35,7 +38,8 @@ export const checkEmailInUse = async (
     }
     next();
   } catch (e) {
-    res.send(e);
+    const message = generateErrorMesaage(e);
+    res.send(message);
   }
 };
 
@@ -48,7 +52,8 @@ export const validateLogin = async (
     await LOGIN_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
-    res.status(400).send(e);
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };
 
@@ -79,7 +84,8 @@ export const validateUserCredentials = async (
     };
     next();
   } catch (e) {
-    res.send(e);
+    const message = generateErrorMesaage(e);
+    res.send(message);
   }
 };
 
@@ -90,8 +96,10 @@ export const validateProfileCompletion = async (
 ) => {
   try {
     await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
+    validateSellerInformation(req.body);
     next();
   } catch (e) {
-    res.status(400).send(e);
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };
