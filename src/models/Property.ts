@@ -1,10 +1,6 @@
 import { Schema, model } from "mongoose";
-import {
-  PROPERTY_TYPES,
-  PROPERTY_AGREEMENT_TYPES,
-  PROPERTY_STATUS,
-  PROPERTY_OWNER_TYPES,
-} from "@/constants/property";
+import { PROPERTY_TYPES, PROPERTY_STATUS } from "@/constants/property";
+import { AGREEMENT_TYPES } from "@/constants/sales";
 import { validateDescription } from "@/validators/property";
 
 const PropertySchema = new Schema({
@@ -34,25 +30,21 @@ const PropertySchema = new Schema({
   agreementType: {
     type: String,
     enum: {
-      values: PROPERTY_AGREEMENT_TYPES,
+      values: AGREEMENT_TYPES,
     },
     required: true,
   },
   description: {
     type: String,
+    required: true,
     validate: {
       validator: validateDescription,
       message: "Description must be 100 characters or more",
     },
   },
   owner: {
-    type: {
-      type: String,
-      enum: {
-        values: PROPERTY_OWNER_TYPES,
-      },
-    },
-    id: String,
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
 });
 

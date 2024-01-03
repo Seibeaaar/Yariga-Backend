@@ -6,8 +6,7 @@ import {
   validatePropertyCreation,
   validatePropertyOwnerRole,
 } from "@/middlewares/property";
-import { PROPERTY_OWNER_TYPE, PROPERTY_STATUS } from "@/enums/property";
-import { USER_ROLE } from "@/enums/user";
+import { PROPERTY_STATUS } from "@/enums/property";
 import { generateErrorMesaage } from "@/utils/common";
 
 const PropertyRouter = Router();
@@ -21,15 +20,9 @@ PropertyRouter.post(
   async (req, res) => {
     try {
       const { profile } = res.locals;
-      const propertyOwner = {
-        id: profile.id,
-        type: PROPERTY_OWNER_TYPE[
-          profile.role === USER_ROLE.Sole ? "Sole" : "Agency"
-        ],
-      };
       const property = new Property({
         ...req.body,
-        owner: propertyOwner,
+        owner: profile.id,
         status: PROPERTY_STATUS.Free,
       });
       const updatedProfile = await User.findByIdAndUpdate(

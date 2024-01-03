@@ -23,6 +23,7 @@ const RoleBasedFields = {
     ],
     default: undefined,
   },
+  taxNumber: String,
   // SP, agent
   clients: {
     type: [
@@ -44,11 +45,7 @@ const RoleBasedFields = {
     default: undefined,
   },
   // Agent
-  licenseNumber: {
-    type: String,
-    unique: true,
-    default: undefined,
-  },
+  licenseNumber: String,
 };
 
 const UserSchema = new Schema({
@@ -58,11 +55,6 @@ const UserSchema = new Schema({
   lastName: String,
   phoneNumber: String,
   dateOfBirth: String,
-  taxNumber: {
-    type: String,
-    unique: true,
-    default: undefined,
-  },
   avatar: String,
   joinedAt: {
     type: String,

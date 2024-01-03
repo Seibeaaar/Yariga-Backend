@@ -96,7 +96,7 @@ export const validateProfileCompletion = async (
 ) => {
   try {
     await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
-    validateSellerInformation(req.body);
+    await validateSellerInformation(req.body);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);

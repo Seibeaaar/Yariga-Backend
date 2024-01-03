@@ -7,7 +7,6 @@ export const connectToDatabase = async () => {
     await mongoose.connect(
       `mongodb+srv://${user}:${password}@main.ygfyp56.mongodb.net/?retryWrites=true&w=majority`,
     );
-    console.log("Connected");
   } catch (e) {
     throw new Error("Unsuccessful connection to database: " + e);
   }
