@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import CommonProfile from "@/models/CommonProfile";
-import { LOGIN_SCHEMA } from "@/validators/auth";
+import User from "@/models/User";
+import {
+  LOGIN_VALIDATION_SCHEMA,
+  SIGN_UP_VALIDATION_SCHEMA,
+  POST_AUTH_VALIDATION_SCHEMA,
+} from "@/validators/auth";
+import { validateSellerInformation } from "@/validators/auth";
+import { generateErrorMesaage } from "@/utils/common";
 
 export const validatePasswordSignUp = async (
   req: Request,
@@ -9,13 +15,11 @@ export const validatePasswordSignUp = async (
   next: NextFunction,
 ) => {
   try {
-    await CommonProfile.validate(req.body);
-    if (!req.body.password) {
-      next("Password is required");
-    }
+    await SIGN_UP_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
-    res.status(400).send(e);
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };
 
@@ -25,7 +29,7 @@ export const checkEmailInUse = async (
   next: NextFunction,
 ) => {
   try {
-    const existingProfile = await CommonProfile.findOne({
+    const existingProfile = await User.findOne({
       email: req.body.email,
     });
     if (existingProfile) {
@@ -34,7 +38,8 @@ export const checkEmailInUse = async (
     }
     next();
   } catch (e) {
-    res.send(e);
+    const message = generateErrorMesaage(e);
+    res.send(message);
   }
 };
 
@@ -44,10 +49,11 @@ export const validateLogin = async (
   next: NextFunction,
 ) => {
   try {
-    await LOGIN_SCHEMA.validate(req.body);
+    await LOGIN_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
-    res.status(400).send(e);
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };
 
@@ -57,7 +63,7 @@ export const validateUserCredentials = async (
   next: NextFunction,
 ) => {
   try {
-    const profile = await CommonProfile.findOne({ email: req.body.email });
+    const profile = await User.findOne({ email: req.body.email });
     if (!profile) {
       res.statusCode = 400;
       next("No user found with such credentials");
@@ -78,6 +84,22 @@ export const validateUserCredentials = async (
     };
     next();
   } catch (e) {
-    res.send(e);
+    const message = generateErrorMesaage(e);
+    res.send(message);
+  }
+};
+
+export const validateProfileCompletion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
+    await validateSellerInformation(req.body);
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };

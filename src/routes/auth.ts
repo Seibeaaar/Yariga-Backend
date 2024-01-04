@@ -1,15 +1,17 @@
 import { Router } from "express";
 import { omit } from "lodash";
 
-import CommonProfile from "@/models/CommonProfile";
-import { signJWToken } from "@/utils/auth";
+import User from "@/models/User";
+import { generateRoleBasedFields, signJWToken } from "@/utils/auth";
 import {
   validatePasswordSignUp,
   validateLogin,
   validateUserCredentials,
   checkEmailInUse,
+  validateProfileCompletion,
 } from "@/middlewares/auth";
-import { COMMON_SERVER_ERROR } from "@/constants/server";
+import { generateErrorMesaage } from "@/utils/common";
+import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 
 const AuthRouter = Router();
 
@@ -19,7 +21,7 @@ AuthRouter.post(
   checkEmailInUse,
   async (req, res) => {
     try {
-      const profile = new CommonProfile(req.body);
+      const profile = new User(req.body);
       await profile.save();
       const token = signJWToken(profile.id);
       res.status(201).send({
@@ -27,7 +29,8 @@ AuthRouter.post(
         profile: omit(profile.toObject(), "password"),
       });
     } catch (e) {
-      res.status(500).send(COMMON_SERVER_ERROR);
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
     }
   },
 );
@@ -45,7 +48,35 @@ AuthRouter.post(
         profile: omit(profile.toObject(), "password"),
       });
     } catch (e) {
-      res.status(500).send(COMMON_SERVER_ERROR);
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
+AuthRouter.post(
+  "/complete",
+  verifyJWToken,
+  extractProfileFromToken,
+  validateProfileCompletion,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+      const roleeBasedFields = generateRoleBasedFields(req.body.role);
+      const completedProfile = await User.findByIdAndUpdate(
+        profile.id,
+        {
+          ...req.body,
+          ...roleeBasedFields,
+        },
+        {
+          new: true,
+        },
+      );
+      res.status(200).send(completedProfile);
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
     }
   },
 );
