@@ -53,8 +53,8 @@ const UserSchema = new Schema({
   password: String,
   firstName: String,
   lastName: String,
-  phoneNumber: String,
   dateOfBirth: String,
+  phoneNumber: String,
   avatar: String,
   joinedAt: {
     type: String,

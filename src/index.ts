@@ -10,6 +10,7 @@ import AuthRouter from "./routes/auth";
 import SolePropRouter from "./routes/soleProp";
 import PropertyRouter from "./routes/property";
 import SalesRouter from "./routes/sales";
+import PhoneVerifcationRouter from "./routes/phoneNumber";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/auth", AuthRouter);
 app.use("/soleProp", SolePropRouter);
 app.use("/property", PropertyRouter);
 app.use("/sales", SalesRouter);
+app.use("/phoneVerification", PhoneVerifcationRouter);
 
 connectToDatabase();
 app.listen(5001);
