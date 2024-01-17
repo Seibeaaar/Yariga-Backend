@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import dayjs from "dayjs";
 import PhoneVerification from "@/models/PhoneVerification";
+import EmailVerification from "@/models/EmailVerification";
 import { generateErrorMesaage } from "@/utils/common";
 import {
   validatePhoneNumber,
   validateVerificationCode,
-} from "@/validators/phoneNumber";
+} from "@/validators/verification";
 
 export const validateNumberForVerification = async (
   req: Request,
@@ -28,7 +29,7 @@ export const validateNumberForVerification = async (
   }
 };
 
-export const validateVerificationRequest = async (
+export const validateNumberVerificationRequest = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -49,7 +50,7 @@ export const validateVerificationRequest = async (
   }
 };
 
-export const checkIfVerificationRequestValid = async (
+export const checkIfNumberVerificationRequestValid = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -79,6 +80,26 @@ export const checkIfVerificationRequestValid = async (
       verificationRequest,
     };
 
+    next();
+  } catch (e) {
+    res.status(400).send(generateErrorMesaage(e));
+  }
+};
+
+export const checkIfEmailVerificationRequestValid = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const requestId = req.params.id;
+    if (!requestId) {
+      throw new Error("Email verification id missing");
+    }
+    const verificationRequest = await EmailVerification.findById(requestId);
+    if (!verificationRequest) {
+      throw new Error("No email verification request found");
+    }
     next();
   } catch (e) {
     res.status(400).send(generateErrorMesaage(e));
