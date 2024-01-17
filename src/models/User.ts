@@ -49,7 +49,13 @@ const RoleBasedFields = {
 };
 
 const UserSchema = new Schema({
-  email: String,
+  email: {
+    value: {
+      type: String,
+      required: true,
+    },
+    verified: Boolean,
+  },
   password: String,
   firstName: String,
   lastName: String,

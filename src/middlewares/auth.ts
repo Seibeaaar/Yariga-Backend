@@ -30,7 +30,7 @@ export const checkEmailInUse = async (
 ) => {
   try {
     const existingProfile = await User.findOne({
-      email: req.body.email,
+      "email.value": req.body.email,
     });
     if (existingProfile) {
       res.statusCode = 400;
@@ -63,7 +63,9 @@ export const validateUserCredentials = async (
   next: NextFunction,
 ) => {
   try {
-    const profile = await User.findOne({ email: req.body.email });
+    const profile = await User.findOne({
+      "email.value": req.body.email,
+    });
     if (!profile) {
       res.statusCode = 400;
       next("No user found with such credentials");

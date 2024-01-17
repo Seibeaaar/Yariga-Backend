@@ -3,16 +3,18 @@ import PhoneVerification from "@/models/PhoneVerification";
 import User from "@/models/User";
 import { sendSMS, generateVerificationCode } from "@/utils/phoneNumber";
 import {
-  checkIfVerificationRequestValid,
+  checkIfEmailVerificationRequestValid,
+  checkIfNumberVerificationRequestValid,
   validateNumberForVerification,
-  validateVerificationRequest,
-} from "@/middlewares/phoneNumber";
+  validateNumberVerificationRequest,
+} from "@/middlewares/verification";
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
 import { generateErrorMesaage } from "@/utils/common";
+import EmailVerification from "@/models/EmailVerification";
 
-const PhoneVerifcationRouter = Router();
+const VerificationRouter = Router();
 
-PhoneVerifcationRouter.post(
+VerificationRouter.post(
   "/sendRequest",
   verifyJWToken,
   validateNumberForVerification,
@@ -36,13 +38,13 @@ PhoneVerifcationRouter.post(
   },
 );
 
-PhoneVerifcationRouter.post(
+VerificationRouter.post(
   "/verifyPhoneNumber",
   verifyJWToken,
   extractProfileFromToken,
   validateNumberForVerification,
-  validateVerificationRequest,
-  checkIfVerificationRequestValid,
+  validateNumberVerificationRequest,
+  checkIfNumberVerificationRequestValid,
   async (req, res) => {
     try {
       const { verificationRequest, profile } = res.locals;
@@ -63,4 +65,32 @@ PhoneVerifcationRouter.post(
   },
 );
 
-export default PhoneVerifcationRouter;
+VerificationRouter.post(
+  "/verifyEmail/:id",
+  verifyJWToken,
+  extractProfileFromToken,
+  checkIfEmailVerificationRequestValid,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+      await EmailVerification.findByIdAndDelete(req.params.id);
+      const updatedProfile = await User.findByIdAndUpdate(
+        profile.id,
+        {
+          email: {
+            email: profile.email,
+            verified: true,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+      res.status(200).send(updatedProfile);
+    } catch (e) {
+      res.status(500).send(generateErrorMesaage(e));
+    }
+  },
+);
+
+export default VerificationRouter;

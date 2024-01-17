@@ -10,6 +10,7 @@ import {
   checkEmailInUse,
   validateProfileCompletion,
 } from "@/middlewares/auth";
+import EmailVerification from "@/models/EmailVerification";
 import { generateErrorMesaage } from "@/utils/common";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 
@@ -21,8 +22,18 @@ AuthRouter.post(
   checkEmailInUse,
   async (req, res) => {
     try {
-      const profile = new User(req.body);
+      const profile = new User({
+        ...req.body,
+        email: {
+          value: req.body.email,
+          verified: false,
+        },
+      });
       await profile.save();
+      const emailVerificationRequest = new EmailVerification({
+        email: req.body.email,
+      });
+      await emailVerificationRequest.save();
       const token = signJWToken(profile.id);
       res.status(201).send({
         token,
