@@ -12,6 +12,7 @@ import {
 } from "@/middlewares/auth";
 import EmailVerification from "@/models/EmailVerification";
 import { generateErrorMesaage } from "@/utils/common";
+import { sendVerificationEmail } from "@/utils/verification";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 
 const AuthRouter = Router();
@@ -34,6 +35,11 @@ AuthRouter.post(
         email: req.body.email,
       });
       await emailVerificationRequest.save();
+      await sendVerificationEmail(
+        req.body.email,
+        `${req.body.firstName} ${req.body.lastName}`,
+        emailVerificationRequest.id,
+      );
       const token = signJWToken(profile.id);
       res.status(201).send({
         token,

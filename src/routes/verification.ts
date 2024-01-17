@@ -1,7 +1,7 @@
 import { Router } from "express";
 import PhoneVerification from "@/models/PhoneVerification";
 import User from "@/models/User";
-import { sendSMS, generateVerificationCode } from "@/utils/phoneNumber";
+import { sendSMS, generateVerificationCode } from "@/utils/verification";
 import {
   checkIfEmailVerificationRequestValid,
   checkIfNumberVerificationRequestValid,
@@ -78,7 +78,7 @@ VerificationRouter.post(
         profile.id,
         {
           email: {
-            email: profile.email,
+            value: profile.email.value,
             verified: true,
           },
         },
