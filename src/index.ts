@@ -11,6 +11,7 @@ import SolePropRouter from "./routes/soleProp";
 import PropertyRouter from "./routes/property";
 import SalesRouter from "./routes/sales";
 import VerificationRouter from "./routes/verification";
+import ProfileRouter from "./routes/profile";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/soleProp", SolePropRouter);
 app.use("/property", PropertyRouter);
 app.use("/sales", SalesRouter);
 app.use("/verification", VerificationRouter);
+app.use("/profile", ProfileRouter);
 
 connectToDatabase();
 app.listen(5001);
