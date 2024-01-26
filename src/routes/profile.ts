@@ -14,6 +14,9 @@ ProfileRouter.post(
   photoUpload.single("avatar"),
   async (req, res) => {
     try {
+      if (!req.file) {
+        throw new Error("There is an error process profile picture");
+      }
       const { profile } = res.locals;
       // Hard reset of Multer.File type
       const file = req.file as unknown as S3File;
