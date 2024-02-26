@@ -8,6 +8,8 @@ import {
 } from "@/middlewares/property";
 import { PROPERTY_STATUS } from "@/enums/property";
 import { generateErrorMesaage } from "@/utils/common";
+import { photoUpload } from "@/utils/media";
+import { S3File } from "@/types/media";
 
 const PropertyRouter = Router();
 
@@ -16,14 +18,20 @@ PropertyRouter.post(
   verifyJWToken,
   extractProfileFromToken,
   validatePropertyOwnerRole,
+  photoUpload.array("photos"),
   validatePropertyCreation,
   async (req, res) => {
     try {
       const { profile } = res.locals;
+      if (!req.files) {
+        throw new Error("Property pictures cannot be processed");
+      }
+      const propertyPhotos = req.files as unknown as S3File[];
       const property = new Property({
         ...req.body,
         owner: profile.id,
         status: PROPERTY_STATUS.Free,
+        photos: propertyPhotos.map((photo) => photo.location),
       });
       const updatedProfile = await User.findByIdAndUpdate(
         profile.id,

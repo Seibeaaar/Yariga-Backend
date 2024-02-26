@@ -46,6 +46,9 @@ const PropertySchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+  photos: {
+    type: [String],
+  },
 });
 
 export default model("Property", PropertySchema);

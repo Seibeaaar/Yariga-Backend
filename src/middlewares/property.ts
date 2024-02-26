@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import Property from "@/models/Property";
 import { USER_ROLE } from "@/enums/user";
+import { generateErrorMesaage } from "@/utils/common";
 
 export const validatePropertyCreation = async (
   req: Request,
@@ -11,8 +12,7 @@ export const validatePropertyCreation = async (
     await Property.validate(req.body);
     next();
   } catch (e) {
-    console.log(e);
-    res.status(400).send(e);
+    res.status(400).send(generateErrorMesaage(e));
   }
 };
 
@@ -24,10 +24,11 @@ export const validatePropertyOwnerRole = async (
   try {
     const { profile } = res.locals;
     if (![USER_ROLE.Sole, USER_ROLE.GM].includes(profile.role)) {
+      res.statusCode = 403;
       next("You are not allowed to operate a property");
     }
     next();
   } catch (e) {
-    res.status(403).send(e);
+    res.send(generateErrorMesaage(e));
   }
 };
