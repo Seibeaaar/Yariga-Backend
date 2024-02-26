@@ -17,5 +17,6 @@ export const photoUpload = multer({
     key: function (_req, _file, cb) {
       cb(null, Date.now().toString());
     },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
   }),
 });
