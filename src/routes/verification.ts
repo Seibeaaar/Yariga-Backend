@@ -15,7 +15,7 @@ import EmailVerification from "@/models/EmailVerification";
 const VerificationRouter = Router();
 
 VerificationRouter.post(
-  "/sendRequest",
+  "/phone/request",
   verifyJWToken,
   validateNumberForVerification,
   async (req, res) => {
@@ -39,7 +39,7 @@ VerificationRouter.post(
 );
 
 VerificationRouter.post(
-  "/verifyPhoneNumber",
+  "/phone/code",
   verifyJWToken,
   extractProfileFromToken,
   validateNumberForVerification,
@@ -66,7 +66,7 @@ VerificationRouter.post(
 );
 
 VerificationRouter.post(
-  "/verifyEmail/:id",
+  "/email/:id",
   verifyJWToken,
   extractProfileFromToken,
   checkIfEmailVerificationRequestValid,
