@@ -62,4 +62,6 @@ export const validateSidesOfSale = async (buyer: string, seller: string) => {
   if (!buyerProfile || !sellerProfile) {
     throw new Error("Invalid buyer and seller info");
   }
+
+  return { buyerProfile, sellerProfile };
 };

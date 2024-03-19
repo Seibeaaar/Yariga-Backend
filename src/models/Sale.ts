@@ -3,6 +3,7 @@ import { Sales } from "@/types/sales";
 import { Schema, model } from "mongoose";
 
 const SalesSchema = new Schema<Sales>({
+  // Sales proposals will be created only by a buyer
   buyer: {
     type: Schema.Types.ObjectId,
     ref: "User",

@@ -7,14 +7,18 @@ import Property from "@/models/Property";
 import { PROPERTY_STATUS } from "@/enums/property";
 import {
   validateSalesBody,
-  checkIfClient,
+  checkIfBuyer,
   checkIfSeller,
   checkSaleIdParam,
   validateSalesInfo,
 } from "@/middlewares/sales";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
-import { generateErrorMesaage } from "@/utils/common";
+import { generateErrorMesaage, getFullName } from "@/utils/common";
 import { SALES_STATUS } from "@/enums/sales";
+import { io } from "../index";
+import { NOTIFICATION_EVENT, NOTIFICATION_TYPE } from "@/enums/notification";
+import { generateSalesNotification } from "@/utils/notification";
+import Notification from "@/models/Notification";
 
 const SalesRouter = Router();
 
@@ -22,7 +26,7 @@ SalesRouter.post(
   "/create",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
+  checkIfBuyer,
   validateSalesBody,
   validateSalesInfo,
   async (req, res) => {
@@ -33,6 +37,7 @@ SalesRouter.post(
       });
       await sale.save();
       const { seller, buyer, property } = req.body;
+      const { buyerProfile, sellerProfile, propertyBody } = res.locals;
       await User.findByIdAndUpdate(
         seller,
         {
@@ -64,6 +69,19 @@ SalesRouter.post(
           new: true,
         },
       );
+
+      const notification = new Notification({
+        body: generateSalesNotification(
+          getFullName(buyerProfile),
+          getFullName(sellerProfile),
+          propertyBody.title,
+          NOTIFICATION_EVENT.NewSales,
+        ),
+        type: NOTIFICATION_TYPE.Booking,
+        receiver: seller,
+      });
+      io.emit(NOTIFICATION_EVENT.NewSales, sale, notification);
+
       res.status(201).send(sale);
     } catch (e) {
       const message = generateErrorMesaage(e);
@@ -76,16 +94,29 @@ SalesRouter.put(
   "/update/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
+  checkIfBuyer,
   checkSaleIdParam,
   validateSalesBody,
   validateSalesInfo,
   async (req, res) => {
     try {
-      const { sale } = res.locals;
+      const { sale, buyerProfile, sellerProfile, propertyBody } = res.locals;
       const updatedSale = await Sale.findByIdAndUpdate(sale.id, req.body, {
         new: true,
       });
+
+      const notification = new Notification({
+        body: generateSalesNotification(
+          getFullName(buyerProfile),
+          getFullName(sellerProfile),
+          propertyBody.title,
+          NOTIFICATION_EVENT.UpdatedSales,
+        ),
+        type: NOTIFICATION_TYPE.Booking,
+        receiver: sellerProfile.id,
+      });
+      io.emit(NOTIFICATION_EVENT.NewSales, sale, notification);
+
       res.status(200).send(updatedSale);
     } catch (e) {
       const message = generateErrorMesaage(e);
@@ -98,7 +129,7 @@ SalesRouter.put(
   "/accept/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfClient,
+  checkIfSeller,
   checkSaleIdParam,
   async (req, res) => {
     try {
@@ -133,7 +164,7 @@ SalesRouter.delete(
   "/delete/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
+  checkIfBuyer,
   checkSaleIdParam,
   async (req, res) => {
     try {
@@ -182,7 +213,7 @@ SalesRouter.put(
   "/decline/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfClient,
+  checkIfSeller,
   checkSaleIdParam,
   async (req, res) => {
     try {

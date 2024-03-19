@@ -36,10 +36,19 @@ export const validateSalesInfo = async (
 ) => {
   try {
     const { endDate, startDate, type, property, buyer, seller } = req.body;
-    await checkIfPropertyExists(property);
-    await validateSidesOfSale(buyer, seller);
+    const propertyBody = await checkIfPropertyExists(property);
+    const { buyerProfile, sellerProfile } = await validateSidesOfSale(
+      buyer,
+      seller,
+    );
     validateAgreementStartDate(startDate);
     validateAgreementEndDate(startDate, type, endDate);
+    res.locals = {
+      ...res.locals,
+      buyerProfile,
+      sellerProfile,
+      propertyBody,
+    };
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
@@ -73,7 +82,7 @@ export const checkIfSeller = async (
  * Checks whether a profile is a client
  * @throws Forbidden when not a client
  */
-export const checkIfClient = async (
+export const checkIfBuyer = async (
   req: Request,
   res: Response,
   next: NextFunction,
