@@ -1,4 +1,4 @@
-export interface S3File {
+export type S3File = {
   bucket: string;
   key: string;
   acl: string;
@@ -17,4 +17,4 @@ export interface S3File {
   filename: string;
   path: string;
   buffer: Buffer;
-}
+};
