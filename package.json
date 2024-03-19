@@ -28,6 +28,7 @@
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
     "nodemailer": "^6.9.8",
+    "socket.io": "^4.7.5",
     "twilio": "^5.0.0-rc.1",
     "yup": "^1.3.2"
   },
@@ -42,6 +43,7 @@
     "@types/multer-s3": "^3.0.3",
     "@types/node": "^20.9.0",
     "@types/nodemailer": "^6.4.14",
+    "@types/socket.io": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "eslint": "^8.53.0",

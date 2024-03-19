@@ -2,6 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
@@ -27,4 +29,9 @@ app.use("/verification", VerificationRouter);
 app.use("/profile", ProfileRouter);
 
 connectToDatabase();
-app.listen(5001);
+
+const server = createServer(app);
+// Exported for a use throughout the app
+export const io = new Server(server);
+
+server.listen(5001);
