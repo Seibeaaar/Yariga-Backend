@@ -10,4 +10,5 @@ export type User = {
   role: USER_ROLE;
   dateOfBirth: string;
   avatar?: string;
+  id: string;
 };

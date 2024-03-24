@@ -13,12 +13,11 @@ import {
   validateSalesInfo,
 } from "@/middlewares/sales";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
-import { generateErrorMesaage, getFullName } from "@/utils/common";
+import { generateErrorMesaage } from "@/utils/common";
 import { SALES_STATUS } from "@/enums/sales";
 import { io } from "../index";
 import { NOTIFICATION_EVENT, NOTIFICATION_TYPE } from "@/enums/notification";
 import { generateSalesNotification } from "@/utils/notification";
-import Notification from "@/models/Notification";
 
 const SalesRouter = Router();
 
@@ -38,27 +37,9 @@ SalesRouter.post(
       await sale.save();
       const { seller, buyer, property } = req.body;
       const { buyerProfile, sellerProfile, propertyBody } = res.locals;
-      await User.findByIdAndUpdate(
-        seller,
-        {
-          $push: {
-            sales: sale.id,
-          },
-        },
-        {
-          new: true,
-        },
-      );
-      await User.findByIdAndUpdate(
-        buyer,
-        {
-          $push: {
-            sales: sale.id,
-          },
-        },
-        {
-          new: true,
-        },
+      await User.updateMany(
+        { _id: { $in: [seller, buyer] } },
+        { $addToSet: { sales: sale.id } },
       );
       await Property.findByIdAndUpdate(
         property,
@@ -70,16 +51,13 @@ SalesRouter.post(
         },
       );
 
-      const notification = new Notification({
-        body: generateSalesNotification(
-          getFullName(buyerProfile),
-          getFullName(sellerProfile),
-          propertyBody.title,
-          NOTIFICATION_EVENT.NewSales,
-        ),
-        type: NOTIFICATION_TYPE.Booking,
-        receiver: seller,
-      });
+      const notification = await generateSalesNotification(
+        buyerProfile,
+        sellerProfile,
+        propertyBody,
+        NOTIFICATION_EVENT.UpdatedSales,
+        NOTIFICATION_TYPE.Booking,
+      );
       io.emit(NOTIFICATION_EVENT.NewSales, sale, notification);
 
       res.status(201).send(sale);
@@ -105,17 +83,14 @@ SalesRouter.put(
         new: true,
       });
 
-      const notification = new Notification({
-        body: generateSalesNotification(
-          getFullName(buyerProfile),
-          getFullName(sellerProfile),
-          propertyBody.title,
-          NOTIFICATION_EVENT.UpdatedSales,
-        ),
-        type: NOTIFICATION_TYPE.Booking,
-        receiver: sellerProfile.id,
-      });
-      io.emit(NOTIFICATION_EVENT.NewSales, sale, notification);
+      const notification = await generateSalesNotification(
+        buyerProfile,
+        sellerProfile,
+        propertyBody,
+        NOTIFICATION_EVENT.UpdatedSales,
+        NOTIFICATION_TYPE.Booking,
+      );
+      io.emit(NOTIFICATION_EVENT.UpdatedSales, sale, notification);
 
       res.status(200).send(updatedSale);
     } catch (e) {
@@ -179,27 +154,9 @@ SalesRouter.delete(
           new: true,
         },
       );
-      await User.findByIdAndUpdate(
-        sale.seller,
-        {
-          $pull: {
-            sales: sale.id,
-          },
-        },
-        {
-          new: true,
-        },
-      );
-      await User.findByIdAndUpdate(
-        sale.buyer,
-        {
-          $pull: {
-            sales: sale.id,
-          },
-        },
-        {
-          new: true,
-        },
+      await User.updateMany(
+        { _id: { $in: [sale.seller, sale.buyer] } },
+        { $pull: { sales: sale.id } },
       );
       res.status(200).send("Successfully deleted a sale");
     } catch (e) {

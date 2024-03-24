@@ -1,6 +1,10 @@
-import { NOTIFICATION_EVENT } from "@/enums/notification";
+import { NOTIFICATION_EVENT, NOTIFICATION_TYPE } from "@/enums/notification";
+import { User } from "@/types/user";
+import Notification from "@/models/Notification";
+import { Property } from "@/types/property";
+import { getFullName } from "./common";
 
-export const generateSalesNotification = (
+export const prepareSalesNotificationText = (
   buyerName: string,
   sellerName: string,
   propertyName: string,
@@ -18,4 +22,31 @@ export const generateSalesNotification = (
     case NOTIFICATION_EVENT.SuggestedSales:
       return `${sellerName} suggests updates to the offer for ${propertyName}. Please check it out.`;
   }
+};
+
+export const generateSalesNotification = async (
+  buyer: User,
+  seller: User,
+  property: Property,
+  event: NOTIFICATION_EVENT,
+  type: NOTIFICATION_TYPE,
+) => {
+  const notificationBody = prepareSalesNotificationText(
+    getFullName(buyer),
+    getFullName(seller),
+    property.name,
+    event,
+  );
+  const notification = new Notification({
+    body: notificationBody,
+    receiver: [
+      NOTIFICATION_EVENT.NewSales,
+      NOTIFICATION_EVENT.UpdatedSales,
+    ].includes(event)
+      ? buyer.id
+      : seller.id,
+    type,
+  });
+  await notification.save();
+  return notification;
 };
