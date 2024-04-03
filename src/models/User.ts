@@ -3,8 +3,7 @@ import bcrypt from "bcrypt";
 import { USER_ROLES } from "@/constants/users";
 
 const RoleBasedFields = {
-  // Sole proprietor (SP), agent, client
-  sales: {
+  agreements: {
     type: [
       {
         type: Schema.Types.ObjectId,
@@ -13,7 +12,6 @@ const RoleBasedFields = {
     ],
     default: undefined,
   },
-  // SP, agent, manager
   properties: {
     type: [
       {
@@ -24,7 +22,6 @@ const RoleBasedFields = {
     default: undefined,
   },
   taxNumber: String,
-  // SP, agent
   clients: {
     type: [
       {
@@ -34,18 +31,6 @@ const RoleBasedFields = {
     ],
     default: undefined,
   },
-  // Manager
-  agents: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Agent",
-      },
-    ],
-    default: undefined,
-  },
-  // Agent
-  licenseNumber: String,
 };
 
 const UserSchema = new Schema({

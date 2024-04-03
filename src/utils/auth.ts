@@ -16,18 +16,12 @@ export const signJWToken = (id: string) => {
 export const generateRoleBasedFields = (role: USER_ROLE) => {
   switch (role) {
     case USER_ROLE.Sole:
-    case USER_ROLE.Agent:
       return {
         properties: [],
         clients: [],
         sales: [],
       };
-    case USER_ROLE.Manager:
-      return {
-        properties: [],
-        agents: [],
-      };
-    case USER_ROLE.Customer:
+    case USER_ROLE.Client:
       return {
         sales: [],
       };

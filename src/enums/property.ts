@@ -17,8 +17,3 @@ export enum PROPERTY_AGREEMENT_TYPE {
   Sale = "sale",
   Rent = "rent",
 }
-
-export enum PROPERTY_OWNER_TYPE {
-  Agency = "agency",
-  Sole = "sole",
-}

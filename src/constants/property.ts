@@ -8,5 +8,3 @@ export const PROPERTY_TYPES = [
 ];
 
 export const PROPERTY_STATUS = ["free", "sold", "reserved"];
-
-export const PROPERTY_OWNER_TYPES = ["sole", "agency"];

@@ -58,8 +58,7 @@ export const checkIfSeller = async (
 ) => {
   try {
     const { profile } = res.locals;
-    const sellerRoles = [USER_ROLE.Agent, USER_ROLE.Sole];
-    if (!sellerRoles.includes(profile.role)) {
+    if (profile.role !== USER_ROLE.Sole) {
       throw new Error("You are not allowed to perform this operation");
     }
     next();
@@ -80,7 +79,7 @@ export const checkIfClient = async (
 ) => {
   try {
     const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Customer) {
+    if (profile.role !== USER_ROLE.Client) {
       throw new Error("You are not allowed to perform this operation");
     }
     next();

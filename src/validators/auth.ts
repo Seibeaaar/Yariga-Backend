@@ -4,12 +4,7 @@ import User from "@/models/User";
 import { USER_ROLES } from "@/constants/users";
 import { USER_ROLE } from "@/enums/user";
 import { ProfileCompletionRequest } from "@/types/auth";
-import {
-  PASSWORD_REGEX,
-  TAX_NUMBER_REGEX,
-  NAME_REGEX,
-  LICENSE_NUMBER_REGEX,
-} from "@/constants/auth";
+import { PASSWORD_REGEX, TAX_NUMBER_REGEX, NAME_REGEX } from "@/constants/auth";
 
 export const SIGN_UP_VALIDATION_SCHEMA = yup.object({
   email: yup.string().required("Email required").email("Invalid email"),
@@ -61,32 +56,13 @@ const validateTaxNumber = async (taxNumber?: string) => {
   }
 };
 
-const validateLicenseNumber = async (licenseNumber?: string) => {
-  if (!licenseNumber) {
-    throw new Error("License number is required");
-  }
-
-  if (!LICENSE_NUMBER_REGEX.test(licenseNumber)) {
-    throw new Error("Invalid license number format");
-  }
-
-  const userWithLicenseNumber = await User.findOne({ licenseNumber });
-
-  if (userWithLicenseNumber) {
-    throw new Error("License number is already in use");
-  }
-};
-
 export const validateSellerInformation = async (
   body: ProfileCompletionRequest,
 ) => {
-  const { taxNumber, licenseNumber, role } = body;
-  if (role === USER_ROLE.Customer) {
+  const { taxNumber, role } = body;
+  if (role === USER_ROLE.Client) {
     return;
   }
 
   await validateTaxNumber(taxNumber);
-  if (role === USER_ROLE.Agent) {
-    await validateLicenseNumber(licenseNumber);
-  }
 };
