@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import Sale from "@/models/Sale";
+import Agreement from "@/models/Agreement";
 import { USER_ROLE } from "@/enums/user";
 import {
   validateAgreementEndDate,
   validateAgreementStartDate,
-  validateSidesOfSale,
-} from "@/validators/sales";
+  validateSidesOfAgreement,
+} from "@/validators/agreement";
 import { generateErrorMesaage } from "@/utils/common";
-import { checkIfSaleExists } from "@/utils/sales";
+import { checkIfAgreementExists } from "@/utils/agreement";
 import { checkIfPropertyExists } from "@/utils/property";
 
 /**
@@ -15,13 +15,13 @@ import { checkIfPropertyExists } from "@/utils/property";
  * Checks a validity of start and end dates of a sale
  * @throws Bad Request if an error occurs
  */
-export const validateSalesBody = async (
+export const validateAgreementBody = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    await Sale.validate(req.body);
+    await Agreement.validate(req.body);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
@@ -29,7 +29,7 @@ export const validateSalesBody = async (
   }
 };
 
-export const validateSalesInfo = async (
+export const validateAgreementInfo = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -37,7 +37,7 @@ export const validateSalesInfo = async (
   try {
     const { endDate, startDate, type, property, buyer, seller } = req.body;
     await checkIfPropertyExists(property);
-    await validateSidesOfSale(buyer, seller);
+    await validateSidesOfAgreement(buyer, seller);
     validateAgreementStartDate(startDate);
     validateAgreementEndDate(startDate, type, endDate);
     next();
@@ -94,13 +94,13 @@ export const checkIfClient = async (
  * Checks if a sale with the id exists and passes it in locals
  * @throws Bad Request in case of error
  */
-export const checkSaleIdParam = async (
+export const checkAgreementIdParam = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const sale = await checkIfSaleExists(req.params.id);
+    const sale = await checkIfAgreementExists(req.params.id);
     res.locals = {
       ...res.locals,
       sale,

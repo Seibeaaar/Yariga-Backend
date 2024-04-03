@@ -1,8 +1,7 @@
-import { AGREEMENT_TYPES, SALES_STATUSES } from "@/constants/sales";
-import { Sales } from "@/types/sales";
+import { AGREEMENT_TYPES, AGREEMENT_STATUSES } from "@/constants/agreement";
 import { Schema, model } from "mongoose";
 
-const SalesSchema = new Schema<Sales>({
+const AgreementSchema = new Schema({
   buyer: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -35,15 +34,13 @@ const SalesSchema = new Schema<Sales>({
     type: String,
     required: true,
   },
-  endDate: {
-    type: String,
-  },
+  endDate: String,
   status: {
     type: String,
     enum: {
-      values: SALES_STATUSES,
+      values: AGREEMENT_STATUSES,
     },
   },
 });
 
-export default model("Sales", SalesSchema);
+export default model("Agreement", AgreementSchema);

@@ -1,43 +1,42 @@
 import { Router } from "express";
 
-import Sale from "@/models/Sale";
+import Agreement from "@/models/Agreement";
 import User from "@/models/User";
 import Property from "@/models/Property";
 
 import { PROPERTY_STATUS } from "@/enums/property";
 import {
-  validateSalesBody,
+  validateAgreementBody,
   checkIfClient,
-  checkIfSeller,
-  checkSaleIdParam,
-  validateSalesInfo,
-} from "@/middlewares/sales";
+  checkAgreementIdParam,
+  validateAgreementInfo,
+} from "@/middlewares/agreement";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 import { generateErrorMesaage } from "@/utils/common";
-import { SALES_STATUS } from "@/enums/sales";
+import { AGREEMENT_STATUS } from "@/enums/agreement";
 
-const SalesRouter = Router();
+const AgreementRouter = Router();
 
-SalesRouter.post(
+AgreementRouter.post(
   "/create",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
-  validateSalesBody,
-  validateSalesInfo,
+  checkIfClient,
+  validateAgreementBody,
+  validateAgreementInfo,
   async (req, res) => {
     try {
-      const sale = new Sale({
+      const agreement = new Agreement({
         ...req.body,
-        status: SALES_STATUS.Pending,
+        status: AGREEMENT_STATUS.Pending,
       });
-      await sale.save();
+      await agreement.save();
       const { seller, buyer, property } = req.body;
       await User.findByIdAndUpdate(
         seller,
         {
           $push: {
-            sales: sale.id,
+            agreements: agreement.id,
           },
         },
         {
@@ -48,7 +47,7 @@ SalesRouter.post(
         buyer,
         {
           $push: {
-            sales: sale.id,
+            agreements: agreement.id,
           },
         },
         {
@@ -64,7 +63,7 @@ SalesRouter.post(
           new: true,
         },
       );
-      res.status(201).send(sale);
+      res.status(201).send(agreement);
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -72,18 +71,17 @@ SalesRouter.post(
   },
 );
 
-SalesRouter.put(
+AgreementRouter.put(
   "/update/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
-  checkSaleIdParam,
-  validateSalesBody,
-  validateSalesInfo,
+  checkAgreementIdParam,
+  validateAgreementBody,
+  validateAgreementInfo,
   async (req, res) => {
     try {
       const { sale } = res.locals;
-      const updatedSale = await Sale.findByIdAndUpdate(sale.id, req.body, {
+      const updatedSale = await Agreement.findByIdAndUpdate(sale.id, req.body, {
         new: true,
       });
       res.status(200).send(updatedSale);
@@ -94,19 +92,18 @@ SalesRouter.put(
   },
 );
 
-SalesRouter.put(
+AgreementRouter.put(
   "/accept/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfClient,
-  checkSaleIdParam,
+  checkAgreementIdParam,
   async (req, res) => {
     try {
       const { sale } = res.locals;
-      const updatedSale = await Sale.findByIdAndUpdate(
+      const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
-          status: SALES_STATUS.Completed,
+          status: AGREEMENT_STATUS.Completed,
         },
         {
           new: true,
@@ -129,16 +126,16 @@ SalesRouter.put(
   },
 );
 
-SalesRouter.delete(
+AgreementRouter.delete(
   "/delete/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfSeller,
-  checkSaleIdParam,
+  checkIfClient,
+  checkAgreementIdParam,
   async (req, res) => {
     try {
       const { sale } = res.locals;
-      await Sale.findByIdAndDelete(sale.id);
+      await Agreement.findByIdAndDelete(sale.id);
       await Property.findByIdAndUpdate(
         sale.property,
         {
@@ -178,19 +175,18 @@ SalesRouter.delete(
   },
 );
 
-SalesRouter.put(
+AgreementRouter.put(
   "/decline/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkIfClient,
-  checkSaleIdParam,
+  checkAgreementIdParam,
   async (req, res) => {
     try {
       const { sale } = res.locals;
-      const updatedSale = await Sale.findByIdAndUpdate(
+      const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
-          status: SALES_STATUS.Declined,
+          status: AGREEMENT_STATUS.Declined,
         },
         {
           new: true,
@@ -213,4 +209,4 @@ SalesRouter.put(
   },
 );
 
-export default SalesRouter;
+export default AgreementRouter;

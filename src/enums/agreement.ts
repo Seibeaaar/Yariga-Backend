@@ -3,7 +3,7 @@ export enum AGREEMENT_TYPE {
   Rent = "rent",
 }
 
-export enum SALES_STATUS {
+export enum AGREEMENT_STATUS {
   Pending = "pending",
   Completed = "completed",
   Declined = "declined",

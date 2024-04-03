@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { PROPERTY_TYPES, PROPERTY_STATUS } from "@/constants/property";
-import { AGREEMENT_TYPES } from "@/constants/sales";
+import { AGREEMENT_TYPES } from "@/constants/agreement";
 import { validateDescription } from "@/validators/property";
 
 const PropertySchema = new Schema({
@@ -48,6 +48,10 @@ const PropertySchema = new Schema({
   },
   photos: {
     type: [String],
+  },
+  priceNegotiable: {
+    type: Boolean,
+    default: false,
   },
 });
 

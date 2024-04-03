@@ -7,7 +7,7 @@ const RoleBasedFields = {
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Sale",
+        ref: "Agreement",
       },
     ],
     default: undefined,
@@ -26,7 +26,7 @@ const RoleBasedFields = {
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Client",
+        ref: "User",
       },
     ],
     default: undefined,
@@ -42,11 +42,17 @@ const UserSchema = new Schema({
     verified: Boolean,
   },
   password: String,
-  firstName: String,
-  lastName: String,
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
   dateOfBirth: String,
   phoneNumber: String,
-  avatar: String,
+  profilePicture: String,
   joinedAt: {
     type: String,
     default: new Date().toISOString(),
