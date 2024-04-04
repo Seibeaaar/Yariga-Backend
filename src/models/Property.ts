@@ -2,6 +2,22 @@ import { Schema, model } from "mongoose";
 import { PROPERTY_TYPES, PROPERTY_STATUS } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 import { validateDescription } from "@/validators/property";
+import { generateBooleanFacilitiesSchema } from "@/utils/property";
+
+const PropertyFacilitySchema = new Schema(
+  {
+    numberOfRooms: {
+      type: Number,
+      default: 1,
+    },
+    numberOfBeds: {
+      type: Number,
+      default: 0,
+    },
+    ...generateBooleanFacilitiesSchema(true),
+  },
+  { _id: false },
+);
 
 const PropertySchema = new Schema({
   name: {
@@ -19,7 +35,7 @@ const PropertySchema = new Schema({
     type: Number,
     required: true,
     min: 1,
-    max: 5000,
+    max: 10000,
   },
   status: {
     type: String,
@@ -53,6 +69,7 @@ const PropertySchema = new Schema({
     type: Boolean,
     default: false,
   },
+  facilities: PropertyFacilitySchema,
 });
 
 export default model("Property", PropertySchema);

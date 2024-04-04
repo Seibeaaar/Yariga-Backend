@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { USER_ROLES } from "@/constants/users";
+import ClientPreferencesSchema from "./ClientPreferences";
 
 const RoleBasedFields = {
   agreements: {
@@ -29,6 +30,10 @@ const RoleBasedFields = {
         ref: "User",
       },
     ],
+    default: undefined,
+  },
+  preferences: {
+    type: ClientPreferencesSchema,
     default: undefined,
   },
 };

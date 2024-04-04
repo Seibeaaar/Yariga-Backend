@@ -17,3 +17,17 @@ export enum PROPERTY_AGREEMENT_TYPE {
   Sale = "sale",
   Rent = "rent",
 }
+
+export enum PROPERTY_PREFERENCE_GRADATION {
+  Standard = "standard",
+  Big = "big",
+  Extra = "extra",
+}
+
+export enum PROPERTY_BOOLEAN_FACILITY {
+  Kitchen = "kitchen",
+  Balcony = "balcony",
+  Parking = "parking",
+  Smoking = "smoking",
+  WiFI = "wiFi",
+}
