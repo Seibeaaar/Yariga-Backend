@@ -4,7 +4,6 @@ export enum PROPERTY_TYPE {
   Garage = "garage",
   Hotel = "hotel",
   Commercial = "commercial",
-  Lot = "lot",
 }
 
 export enum PROPERTY_STATUS {
@@ -24,7 +23,7 @@ export enum PROPERTY_PREFERENCE_GRADATION {
   Extra = "extra",
 }
 
-export enum PROPERTY_BOOLEAN_FACILITY {
+export enum PROPERTY_FACILITY {
   Kitchen = "kitchen",
   Balcony = "balcony",
   Parking = "parking",

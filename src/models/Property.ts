@@ -1,23 +1,11 @@
 import { Schema, model } from "mongoose";
-import { PROPERTY_TYPES, PROPERTY_STATUS } from "@/constants/property";
+import {
+  PROPERTY_TYPES,
+  PROPERTY_STATUS,
+  PROPERTY_FACILITIES,
+} from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 import { validateDescription } from "@/validators/property";
-import { generateBooleanFacilitiesSchema } from "@/utils/property";
-
-const PropertyFacilitySchema = new Schema(
-  {
-    numberOfRooms: {
-      type: Number,
-      default: 1,
-    },
-    numberOfBeds: {
-      type: Number,
-      default: 0,
-    },
-    ...generateBooleanFacilitiesSchema(true),
-  },
-  { _id: false },
-);
 
 const PropertySchema = new Schema({
   name: {
@@ -62,14 +50,35 @@ const PropertySchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-  photos: {
-    type: [String],
-  },
+  photos: [String],
   priceNegotiable: {
     type: Boolean,
     default: false,
   },
-  facilities: PropertyFacilitySchema,
+  rooms: {
+    type: Number,
+    required: true,
+    default: 1,
+  },
+  beds: Number,
+  floors: {
+    type: Number,
+    required: true,
+    default: 1,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  floorLevel: Number,
+  facilities: [
+    {
+      type: String,
+      enum: {
+        values: PROPERTY_FACILITIES,
+      },
+    },
+  ],
 });
 
 export default model("Property", PropertySchema);
