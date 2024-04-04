@@ -36,7 +36,9 @@ PropertyRouter.post(
       const updatedProfile = await User.findByIdAndUpdate(
         profile.id,
         {
-          properties: [...profile.properties, property.id],
+          $push: {
+            properties: property.id,
+          },
         },
         { new: true },
       );

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import Property from "@/models/Property";
 import { USER_ROLE } from "@/enums/user";
 import { generateErrorMesaage } from "@/utils/common";
+import { PROPERTY_VALIDATION_SCHEMA } from "@/validators/property";
 
 export const validatePropertyCreation = async (
   req: Request,
@@ -9,7 +9,7 @@ export const validatePropertyCreation = async (
   next: NextFunction,
 ) => {
   try {
-    await Property.validate(req.body);
+    await PROPERTY_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
     res.status(400).send(generateErrorMesaage(e));
