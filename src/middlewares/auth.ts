@@ -4,9 +4,7 @@ import User from "@/models/User";
 import {
   LOGIN_VALIDATION_SCHEMA,
   SIGN_UP_VALIDATION_SCHEMA,
-  POST_AUTH_VALIDATION_SCHEMA,
 } from "@/validators/auth";
-import { validateSellerInformation } from "@/validators/auth";
 import { generateErrorMesaage } from "@/utils/common";
 
 export const validatePasswordSignUp = async (
@@ -88,20 +86,5 @@ export const validateUserCredentials = async (
   } catch (e) {
     const message = generateErrorMesaage(e);
     res.send(message);
-  }
-};
-
-export const validateProfileCompletion = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
-    await validateSellerInformation(req.body);
-    next();
-  } catch (e) {
-    const message = generateErrorMesaage(e);
-    res.status(400).send(message);
   }
 };
