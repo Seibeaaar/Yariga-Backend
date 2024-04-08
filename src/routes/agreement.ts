@@ -7,10 +7,10 @@ import Property from "@/models/Property";
 import { PROPERTY_STATUS } from "@/enums/property";
 import {
   validateAgreementBody,
-  checkIfClient,
   checkAgreementIdParam,
   validateAgreementInfo,
 } from "@/middlewares/agreement";
+import { checkIfLandlord, checkIfClient } from "@/middlewares/profile";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 import { generateErrorMesaage } from "@/utils/common";
 import { AGREEMENT_STATUS } from "@/enums/agreement";
@@ -31,7 +31,7 @@ AgreementRouter.post(
         status: AGREEMENT_STATUS.Pending,
       });
       await agreement.save();
-      const { seller, buyer, property } = req.body;
+      const { seller, buyer } = req.body;
       await User.findByIdAndUpdate(
         seller,
         {
@@ -49,15 +49,6 @@ AgreementRouter.post(
           $push: {
             agreements: agreement.id,
           },
-        },
-        {
-          new: true,
-        },
-      );
-      await Property.findByIdAndUpdate(
-        property,
-        {
-          status: PROPERTY_STATUS.Reserved,
         },
         {
           new: true,
@@ -81,9 +72,16 @@ AgreementRouter.put(
   async (req, res) => {
     try {
       const { sale } = res.locals;
-      const updatedSale = await Agreement.findByIdAndUpdate(sale.id, req.body, {
-        new: true,
-      });
+      const updatedSale = await Agreement.findByIdAndUpdate(
+        sale.id,
+        {
+          ...req.body,
+          status: AGREEMENT_STATUS.Changed,
+        },
+        {
+          new: true,
+        },
+      );
       res.status(200).send(updatedSale);
     } catch (e) {
       const message = generateErrorMesaage(e);
@@ -103,7 +101,7 @@ AgreementRouter.put(
       const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
-          status: AGREEMENT_STATUS.Completed,
+          status: AGREEMENT_STATUS.Settled,
         },
         {
           new: true,
@@ -112,7 +110,7 @@ AgreementRouter.put(
       await Property.findByIdAndUpdate(
         sale.property,
         {
-          status: PROPERTY_STATUS.Sold,
+          status: PROPERTY_STATUS.Reserved,
         },
         {
           new: true,
@@ -196,6 +194,41 @@ AgreementRouter.put(
         sale.property,
         {
           status: PROPERTY_STATUS.Free,
+        },
+        {
+          new: true,
+        },
+      );
+      res.status(200).send(updatedSale);
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
+AgreementRouter.post(
+  "/complete/:id",
+  verifyJWToken,
+  extractProfileFromToken,
+  checkIfLandlord,
+  checkAgreementIdParam,
+  async (req, res) => {
+    try {
+      const { sale } = res.locals;
+      const updatedSale = await Agreement.findByIdAndUpdate(
+        sale.id,
+        {
+          status: AGREEMENT_STATUS.Completed,
+        },
+        {
+          new: true,
+        },
+      );
+      await Property.findByIdAndUpdate(
+        sale.property,
+        {
+          status: PROPERTY_STATUS.Sold,
         },
         {
           new: true,

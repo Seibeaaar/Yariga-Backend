@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import Agreement from "@/models/Agreement";
-import { USER_ROLE } from "@/enums/user";
 import {
   validateAgreementEndDate,
   validateAgreementStartDate,
@@ -44,48 +43,6 @@ export const validateAgreementInfo = async (
   } catch (e) {
     const message = generateErrorMesaage(e);
     res.status(400).send(message);
-  }
-};
-
-/**
- * Checks whether a profile is a seller
- * @throws Forbidden when not a seller
- */
-export const checkIfSeller = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Sole) {
-      throw new Error("You are not allowed to perform this operation");
-    }
-    next();
-  } catch (e) {
-    const message = generateErrorMesaage(e);
-    res.status(403).send(message);
-  }
-};
-
-/**
- * Checks whether a profile is a client
- * @throws Forbidden when not a client
- */
-export const checkIfClient = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Client) {
-      throw new Error("You are not allowed to perform this operation");
-    }
-    next();
-  } catch (e) {
-    const message = generateErrorMesaage(e);
-    res.status(403).send(message);
   }
 };
 

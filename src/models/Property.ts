@@ -8,7 +8,7 @@ import { AGREEMENT_TYPES } from "@/constants/agreement";
 import { validateDescription } from "@/validators/property";
 
 const PropertySchema = new Schema({
-  name: {
+  title: {
     type: String,
     required: true,
   },

@@ -29,16 +29,13 @@ export const validateAgreementEndDate = (
   type: AGREEMENT_TYPE,
   endDate?: string,
 ) => {
-  if (type === AGREEMENT_TYPE.Sale) {
+  if (type === AGREEMENT_TYPE.Sale || !endDate) {
     return;
   }
 
   let error = "";
 
   switch (true) {
-    case !endDate:
-      error = "End date is required";
-      break;
     case !dayjs(endDate).isValid():
       error = "Invalid end date";
       break;

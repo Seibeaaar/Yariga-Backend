@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Property from "@/models/Property";
+import { omit } from "lodash";
 import User from "@/models/User";
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
 import {
@@ -44,7 +45,7 @@ PropertyRouter.post(
       );
       await property.save();
       res.status(201).send({
-        profile: updatedProfile,
+        profile: omit(updatedProfile?.toObject(), "password"),
         property,
       });
     } catch (e) {

@@ -5,6 +5,8 @@ export enum AGREEMENT_TYPE {
 
 export enum AGREEMENT_STATUS {
   Pending = "pending",
-  Completed = "completed",
   Declined = "declined",
+  Changed = "changed",
+  Settled = "settled",
+  Completed = "completed",
 }

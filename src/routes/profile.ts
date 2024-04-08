@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { S3File } from "@/types/media";
+import { omit } from "lodash";
 import User from "@/models/User";
 import { photoUpload } from "@/utils/media";
 import { generateErrorMesaage } from "@/utils/common";
@@ -17,7 +18,7 @@ ProfileRouter.post(
   "/picture",
   verifyJWToken,
   extractProfileFromToken,
-  photoUpload.single("avatar"),
+  photoUpload.single("picture"),
   async (req, res) => {
     try {
       if (!req.file) {
@@ -29,13 +30,13 @@ ProfileRouter.post(
       const updatedProfile = await User.findByIdAndUpdate(
         profile.id,
         {
-          avatar: `${file.location}`,
+          profilePicture: `${file.location}`,
         },
         {
           new: true,
         },
       );
-      res.status(200).send(updatedProfile);
+      res.status(200).send(omit(updatedProfile?.toObject(), "password"));
     } catch (e) {
       res.status(500).send(generateErrorMesaage(e));
     }
@@ -61,7 +62,7 @@ ProfileRouter.post(
           new: true,
         },
       );
-      res.status(200).send(completedProfile);
+      res.status(200).send(omit(completedProfile?.toObject, "password"));
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -89,7 +90,7 @@ ProfileRouter.post(
           new: true,
         },
       );
-      res.status(200).send(updatedClientProfile);
+      res.status(200).send(omit(updatedClientProfile?.toObject(), "password"));
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
