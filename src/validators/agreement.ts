@@ -1,4 +1,4 @@
-import { AGREEMENT_TYPE } from "@/enums/sales";
+import { AGREEMENT_TYPE } from "@/enums/agreement";
 import User from "@/models/User";
 import dayjs from "dayjs";
 
@@ -29,16 +29,13 @@ export const validateAgreementEndDate = (
   type: AGREEMENT_TYPE,
   endDate?: string,
 ) => {
-  if (type === AGREEMENT_TYPE.Sale) {
+  if (type === AGREEMENT_TYPE.Sale || !endDate) {
     return;
   }
 
   let error = "";
 
   switch (true) {
-    case !endDate:
-      error = "End date is required";
-      break;
     case !dayjs(endDate).isValid():
       error = "Invalid end date";
       break;
@@ -55,7 +52,10 @@ export const validateAgreementEndDate = (
   throw new Error(error);
 };
 
-export const validateSidesOfSale = async (buyer: string, seller: string) => {
+export const validateSidesOfAgreement = async (
+  buyer: string,
+  seller: string,
+) => {
   const buyerProfile = await User.findById(buyer);
   const sellerProfile = await User.findById(seller);
 

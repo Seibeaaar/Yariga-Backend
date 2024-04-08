@@ -4,7 +4,6 @@ export enum PROPERTY_TYPE {
   Garage = "garage",
   Hotel = "hotel",
   Commercial = "commercial",
-  Lot = "lot",
 }
 
 export enum PROPERTY_STATUS {
@@ -18,7 +17,16 @@ export enum PROPERTY_AGREEMENT_TYPE {
   Rent = "rent",
 }
 
-export enum PROPERTY_OWNER_TYPE {
-  Agency = "agency",
-  Sole = "sole",
+export enum PROPERTY_PREFERENCE_GRADATION {
+  Standard = "standard",
+  Big = "big",
+  Extra = "extra",
+}
+
+export enum PROPERTY_FACILITY {
+  Kitchen = "kitchen",
+  Balcony = "balcony",
+  Parking = "parking",
+  Smoking = "smoking",
+  WiFI = "wiFi",
 }

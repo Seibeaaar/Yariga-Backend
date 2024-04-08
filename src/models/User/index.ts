@@ -1,19 +1,18 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { USER_ROLES } from "@/constants/users";
+import ClientPreferencesSchema from "./ClientPreferences";
 
 const RoleBasedFields = {
-  // Sole proprietor (SP), agent, client
-  sales: {
+  agreements: {
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Sale",
+        ref: "Agreement",
       },
     ],
     default: undefined,
   },
-  // SP, agent, manager
   properties: {
     type: [
       {
@@ -24,28 +23,19 @@ const RoleBasedFields = {
     default: undefined,
   },
   taxNumber: String,
-  // SP, agent
   clients: {
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Client",
+        ref: "User",
       },
     ],
     default: undefined,
   },
-  // Manager
-  agents: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Agent",
-      },
-    ],
+  preferences: {
+    type: ClientPreferencesSchema,
     default: undefined,
   },
-  // Agent
-  licenseNumber: String,
 };
 
 const UserSchema = new Schema({
@@ -57,11 +47,17 @@ const UserSchema = new Schema({
     verified: Boolean,
   },
   password: String,
-  firstName: String,
-  lastName: String,
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
   dateOfBirth: String,
   phoneNumber: String,
-  avatar: String,
+  profilePicture: String,
   joinedAt: {
     type: String,
     default: new Date().toISOString(),
