@@ -4,9 +4,11 @@ import { omit } from "lodash";
 import User from "@/models/User";
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
 import {
-  validatePropertyCreation,
-  validatePropertyOwnerRole,
+  validatePropertyData,
+  validatePropertyIdParam,
+  checkiIfPropertyOwner,
 } from "@/middlewares/property";
+import { checkIfLandlord } from "@/middlewares/profile";
 import { PROPERTY_STATUS } from "@/enums/property";
 import { generateErrorMesaage } from "@/utils/common";
 import { photoUpload } from "@/utils/media";
@@ -18,9 +20,9 @@ PropertyRouter.post(
   "/add",
   verifyJWToken,
   extractProfileFromToken,
-  validatePropertyOwnerRole,
+  checkIfLandlord,
   photoUpload.array("photos"),
-  validatePropertyCreation,
+  validatePropertyData,
   async (req, res) => {
     try {
       const { profile } = res.locals;
@@ -48,6 +50,61 @@ PropertyRouter.post(
         profile: omit(updatedProfile?.toObject(), "password"),
         property,
       });
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
+PropertyRouter.put(
+  "/update/:id",
+  verifyJWToken,
+  extractProfileFromToken,
+  checkIfLandlord,
+  checkiIfPropertyOwner,
+  photoUpload.array("photos"),
+  validatePropertyData,
+  async (req, res) => {
+    try {
+      if (!req.files) {
+        throw new Error("Property pictures cannot be processed");
+      }
+      const updatedProperty = await Property.findByIdAndUpdate(
+        req.params.id,
+        {
+          ...req.body,
+        },
+        {
+          new: true,
+        },
+      );
+      res.status(200).send(updatedProperty);
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
+PropertyRouter.delete(
+  "/delete/:id",
+  verifyJWToken,
+  extractProfileFromToken,
+  checkIfLandlord,
+  validatePropertyIdParam,
+  checkiIfPropertyOwner,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+      const propertyId = req.params.id;
+      await Property.findByIdAndDelete(propertyId);
+      await User.findByIdAndUpdate(profile.id, {
+        $pull: {
+          properties: propertyId,
+        },
+      });
+      res.status(200).send("Property deleted successfully");
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
