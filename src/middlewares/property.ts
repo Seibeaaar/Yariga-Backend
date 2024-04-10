@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { USER_ROLE } from "@/enums/user";
 import { generateErrorMesaage } from "@/utils/common";
-import { PROPERTY_VALIDATION_SCHEMA } from "@/validators/property";
+import {
+  PROPERTY_VALIDATION_SCHEMA,
+  PROPERTY_FILTERS_VALIDATION,
+} from "@/validators/property";
 import { checkIfPropertyExists } from "@/utils/property";
 
 export const validatePropertyData = async (
@@ -64,5 +67,19 @@ export const checkiIfPropertyOwner = async (
     next();
   } catch (e) {
     res.status(403).send(generateErrorMesaage(e));
+  }
+};
+
+export const validatePropertyFilters = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await PROPERTY_FILTERS_VALIDATION.validate(req.body);
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
   }
 };

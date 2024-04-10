@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import {
   PROPERTY_TYPES,
-  PROPERTY_STATUS,
+  PROPERTY_STATUSES,
   PROPERTY_FACILITIES,
 } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
@@ -28,7 +28,7 @@ const PropertySchema = new Schema({
   status: {
     type: String,
     enum: {
-      values: PROPERTY_STATUS,
+      values: PROPERTY_STATUSES,
     },
   },
   agreementType: {

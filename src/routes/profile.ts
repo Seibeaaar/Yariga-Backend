@@ -8,8 +8,8 @@ import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 import {
   validateProfileCompletion,
   checkIfClient,
-  validateClientPreferences,
 } from "@/middlewares/profile";
+import { validatePropertyFilters } from "@/middlewares/property";
 import { generateRoleBasedFields } from "@/utils/profile";
 
 const ProfileRouter = Router();
@@ -75,7 +75,7 @@ ProfileRouter.post(
   verifyJWToken,
   extractProfileFromToken,
   checkIfClient,
-  validateClientPreferences,
+  validatePropertyFilters,
   async (req, res) => {
     try {
       const { profile } = res.locals;

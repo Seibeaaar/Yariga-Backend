@@ -9,7 +9,7 @@ export const PROPERTY_TYPES = [
 export const ELEVATED_PROPERTY_TYPES = ["apartment", "hotel", "commercial"];
 export const HOSTING_PROPERTY_TYPES = ["house", "apartment", "hotel"];
 
-export const PROPERTY_STATUS = ["free", "sold", "reserved"];
+export const PROPERTY_STATUSES = ["free", "sold", "reserved"];
 
 export const PROPERTY_PREFERENCE_GRADATIONS = ["standard", "big", "extra"];
 

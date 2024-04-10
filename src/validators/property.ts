@@ -4,7 +4,16 @@ import {
   ELEVATED_PROPERTY_TYPES,
   HOSTING_PROPERTY_TYPES,
   PROPERTY_FACILITIES,
+  PROPERTY_STATUSES,
 } from "@/constants/property";
+import {
+  FLOOR_LIMIT,
+  AREA_LIMIT,
+  PRICE_LIMIT,
+  ROOM_LIMIT,
+  BED_LIMIT,
+} from "@/enums/property";
+import { AGREEMENT_TYPES } from "@/constants/agreement";
 
 export const PROPERTY_VALIDATION_SCHEMA = yup.object({
   title: yup.string().required("Property title required"),
@@ -15,13 +24,13 @@ export const PROPERTY_VALIDATION_SCHEMA = yup.object({
   area: yup
     .number()
     .required("Area of a property required")
-    .min(1, "Area cannot be less than 1 sq.m.")
-    .max(10000, "Area cannot be larger than 10000 sq.m."),
+    .min(AREA_LIMIT.Min, "Area cannot be less than 1 sq.m.")
+    .max(AREA_LIMIT.Max, "Area cannot be larger than 10000 sq.m."),
   price: yup
     .number()
     .required("Price required")
-    .min(1, "Price cannot be lower than 1$")
-    .max(50000000, "Price cannot be higher than 50M $"),
+    .min(PRICE_LIMIT.Min, "Price cannot be lower than 1$")
+    .max(PRICE_LIMIT.Max, "Price cannot be higher than 50M $"),
   priceNegotiable: yup.boolean(),
   type: yup
     .string()
@@ -30,16 +39,21 @@ export const PROPERTY_VALIDATION_SCHEMA = yup.object({
   rooms: yup
     .number()
     .required("Number of rooms required")
-    .min(1, "At least one room"),
+    .min(ROOM_LIMIT.Min, "At least one room")
+    .max(ROOM_LIMIT.Max, "Max rooms - 1000"),
   beds: yup.number().when("type", ([type], schema) => {
     return HOSTING_PROPERTY_TYPES.includes(type)
-      ? schema.required().min(1, "At least one bed")
+      ? schema
+          .required()
+          .min(BED_LIMIT.Min, "At least one bed")
+          .max(BED_LIMIT.Max, "Top number of beds - 2000")
       : schema;
   }),
   floors: yup
     .number()
     .required("Number of floors required")
-    .min(1, "At least one floor"),
+    .min(FLOOR_LIMIT.Min, "At least one floor")
+    .max(FLOOR_LIMIT.Max, "Should not exceed 100 floors"),
   location: yup.string().required("Location required"),
   floorLevel: yup.number().when("type", ([type], schema) => {
     return ELEVATED_PROPERTY_TYPES.includes(type)
@@ -50,3 +64,82 @@ export const PROPERTY_VALIDATION_SCHEMA = yup.object({
 });
 
 export const validateDescription = (v: string) => v.trim().length >= 100;
+
+export const PROPERTY_FILTERS_VALIDATION = yup.object({
+  topPrice: yup
+    .number()
+    .min(PRICE_LIMIT.Min, "Top price too low")
+    .max(PRICE_LIMIT.Max, "Top price exceeded"),
+  bottomPrice: yup.number().when("topPrice", ([topPrice], schema) => {
+    return topPrice
+      ? schema.min(1, "Bottom price too low").max(topPrice, "Should not exceed")
+      : schema;
+  }),
+  topArea: yup
+    .number()
+    .min(AREA_LIMIT.Min, "Top area too low")
+    .max(AREA_LIMIT.Max, "Top area exceeded"),
+  bottomArea: yup.number().when("topArea", ([topArea], schema) => {
+    return topArea
+      ? schema
+          .min(1, "Bottom area too low")
+          .max(topArea, "Should not exceed top area")
+      : schema;
+  }),
+  topFloorLevel: yup
+    .number()
+    .min(FLOOR_LIMIT.Min, "Top floor level at least 1")
+    .max(FLOOR_LIMIT.Max, "Top floor level should not exceed"),
+  bottomFloorLevel: yup
+    .number()
+    .when("topFloorLevel", ([topFloorLevel], schema) => {
+      return topFloorLevel
+        ? schema
+            .min(FLOOR_LIMIT.Min, "Bottom floor level at least 1")
+            .max(topFloorLevel, "Should not exceed top floor level")
+        : schema;
+    }),
+  topRoomsNumber: yup
+    .number()
+    .min(ROOM_LIMIT.Min, "Top floor level at least 1")
+    .max(ROOM_LIMIT.Max, "Top floor level should not exceed"),
+  bottomRoomsNumber: yup
+    .number()
+    .when("topFloorLevel", ([topRoomsNumber], schema) => {
+      return topRoomsNumber
+        ? schema
+            .min(ROOM_LIMIT.Min, "Bottom floor level at least 1")
+            .max(topRoomsNumber, "Should not exceed top floor level")
+        : schema;
+    }),
+  topBedsNumber: yup
+    .number()
+    .min(BED_LIMIT.Min, "Top floor level at least 1")
+    .max(BED_LIMIT.Max, "Top floor level should not exceed"),
+  bottomBedsNumber: yup
+    .number()
+    .when("topBedsNumber", ([topBedsNumber], schema) => {
+      return topBedsNumber
+        ? schema
+            .min(BED_LIMIT.Min, "Bottom floor level at least 1")
+            .max(topBedsNumber, "Should not exceed top floor level")
+        : schema;
+    }),
+  topFloorsNumber: yup
+    .number()
+    .min(FLOOR_LIMIT.Min, "Top floor level at least 1")
+    .max(FLOOR_LIMIT.Max, "Top floor level should not exceed"),
+  bottomFloorsNumber: yup
+    .number()
+    .when("topFloorsNumber", ([topFloorsNumber], schema) => {
+      return topFloorsNumber
+        ? schema
+            .min(FLOOR_LIMIT.Min, "Bottom floor level at least 1")
+            .max(topFloorsNumber, "Should not exceed top floor level")
+        : schema;
+    }),
+
+  facilities: yup.array().ensure().of(yup.string().oneOf(PROPERTY_FACILITIES)),
+  agreementType: yup.array().ensure().of(yup.string().oneOf(AGREEMENT_TYPES)),
+  status: yup.array().ensure().of(yup.string().oneOf(PROPERTY_STATUSES)),
+});
