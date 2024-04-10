@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { validateSellerInformation } from "@/validators/profile";
-import {
-  POST_AUTH_VALIDATION_SCHEMA,
-  CLIENT_PREFERENCES_VALIDATION_SCHEMA,
-} from "@/validators/profile";
+import { POST_AUTH_VALIDATION_SCHEMA } from "@/validators/profile";
 import { generateErrorMesaage } from "@/utils/common";
 import { USER_ROLE } from "@/enums/user";
 
@@ -61,19 +58,5 @@ export const checkIfLandlord = async (
   } catch (e) {
     const message = generateErrorMesaage(e);
     res.status(403).send(message);
-  }
-};
-
-export const validateClientPreferences = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    await CLIENT_PREFERENCES_VALIDATION_SCHEMA.validate(req.body);
-    next();
-  } catch (e) {
-    const message = generateErrorMesaage(e);
-    res.status(400).send(message);
   }
 };
