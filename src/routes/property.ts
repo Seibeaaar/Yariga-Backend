@@ -9,21 +9,17 @@ import {
   checkiIfPropertyOwner,
   validatePropertyFilters,
 } from "@/middlewares/property";
-import { checkIfLandlord } from "@/middlewares/profile";
-import {
-  FLOOR_LIMIT,
-  AREA_LIMIT,
-  PRICE_LIMIT,
-  PROPERTY_STATUS,
-  BED_LIMIT,
-  ROOM_LIMIT,
-} from "@/enums/property";
+import { checkIfClient, checkIfLandlord } from "@/middlewares/profile";
+import { PROPERTY_STATUS } from "@/enums/property";
 import { generateErrorMesaage } from "@/utils/common";
 import { photoUpload } from "@/utils/media";
 import { S3File } from "@/types/media";
 import { PropertyFilters } from "@/types/property";
-import { PROPERTY_STATUSES } from "@/constants/property";
-import { AGREEMENT_TYPES } from "@/constants/agreement";
+import {
+  generatePropertyFilterQuery,
+  getPropertyRecommendations,
+} from "@/utils/property";
+import Agreement from "@/models/Agreement";
 
 const PropertyRouter = Router();
 
@@ -131,43 +127,35 @@ PropertyRouter.post(
   async (req, res) => {
     try {
       const filters = req.body as PropertyFilters;
-      const results = await Property.find({
-        price: {
-          $gte: filters.bottomPrice ?? PRICE_LIMIT.Min,
-          $lte: filters.topPrice ?? PRICE_LIMIT.Max,
-        },
-        area: {
-          $gte: filters.bottomArea ?? AREA_LIMIT.Min,
-          $lte: filters.topArea ?? AREA_LIMIT.Max,
-        },
-        floorLevel: {
-          $gte: filters.bottomFloorLevel ?? FLOOR_LIMIT.Min,
-          $lte: filters.topFloorLevel ?? FLOOR_LIMIT.Max,
-        },
-        beds: {
-          $gte: filters.bottomBedsNumber ?? BED_LIMIT.Min,
-          $lte: filters.topBedsNumber ?? BED_LIMIT.Max,
-        },
-        rooms: {
-          $gte: filters.bottomRoomsNumber ?? ROOM_LIMIT.Min,
-          $lte: filters.topRoomsNumber ?? ROOM_LIMIT.Max,
-        },
-        floors: {
-          $gte: filters.bottomFloorsNumber ?? FLOOR_LIMIT.Min,
-          $lte: filters.topFloorsNumber ?? FLOOR_LIMIT.Max,
-        },
-        agreementType: {
-          $in: filters.agreementType ?? AGREEMENT_TYPES,
-        },
-        ...(filters.facilities && {
-          facilities: {
-            $in: filters.facilities,
-          },
-        }),
-        status: {
-          $in: filters.status ?? PROPERTY_STATUSES,
+      const results = await Property.find(generatePropertyFilterQuery(filters));
+      res.status(200).send(results);
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
+PropertyRouter.get(
+  "/recommendations",
+  verifyJWToken,
+  extractProfileFromToken,
+  checkIfClient,
+  async (req, res) => {
+    try {
+      const {
+        profile: { preferences, agreements },
+      } = res.locals;
+      const agreementDocs = await Agreement.find({
+        _id: {
+          $in: agreements,
         },
       });
+      const previousLandlords = agreementDocs.map((a) => a.seller.toString());
+      const results = await getPropertyRecommendations(
+        preferences,
+        previousLandlords,
+      );
       res.status(200).send(results);
     } catch (e) {
       const message = generateErrorMesaage(e);
