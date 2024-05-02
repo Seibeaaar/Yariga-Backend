@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import { OAuth2Client } from "google-auth-library";
 import User from "@/models/User";
 import {
   LOGIN_VALIDATION_SCHEMA,
   SIGN_UP_VALIDATION_SCHEMA,
 } from "@/validators/auth";
 import { generateErrorMesaage } from "@/utils/common";
+import axios from "axios";
 
 export const validatePasswordSignUp = async (
   req: Request,
@@ -90,8 +90,6 @@ export const validateUserCredentials = async (
   }
 };
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 export const verifyGoogleAuth = async (
   req: Request,
   res: Response,
@@ -103,26 +101,21 @@ export const verifyGoogleAuth = async (
       throw new Error("Token required");
     }
 
-    const ticket = await client.verifyIdToken({
-      idToken: req.body.token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
+    const { data: googleProfile } = await axios.get(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${req.body.token}`,
+    );
 
-    if (!payload) {
+    if (!googleProfile) {
       res.statusCode = 403;
       throw new Error("No or invalid user detected.");
     }
 
     res.locals = {
       ...res.locals,
-      payload,
+      payload: googleProfile,
     };
     next();
   } catch (e) {
-    if (res.statusCode < 400) {
-      res.statusCode = 403;
-    }
     const message = generateErrorMesaage(e);
     res.send(message);
   }
