@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 import User from "@/models/User";
 import {
   LOGIN_VALIDATION_SCHEMA,
@@ -32,7 +33,7 @@ export const checkEmailInUse = async (
     });
     if (existingProfile) {
       res.statusCode = 400;
-      next("Email already in use");
+      throw new Error("Email already in use");
     }
     next();
   } catch (e) {
@@ -66,7 +67,7 @@ export const validateUserCredentials = async (
     });
     if (!profile) {
       res.statusCode = 400;
-      next("No user found with such credentials");
+      throw new Error("No user found with such credentials");
     }
     if (profile?.password) {
       const passwordMatches = bcrypt.compareSync(
@@ -75,7 +76,7 @@ export const validateUserCredentials = async (
       );
       if (!passwordMatches) {
         res.statusCode = 400;
-        next("No user found with such credentials");
+        throw new Error("No user found with such credentials");
       }
     }
     res.locals = {
@@ -84,6 +85,44 @@ export const validateUserCredentials = async (
     };
     next();
   } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.send(message);
+  }
+};
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const verifyGoogleAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.body.token) {
+      res.statusCode = 400;
+      throw new Error("Token required");
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: req.body.token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+      res.statusCode = 403;
+      throw new Error("No or invalid user detected.");
+    }
+
+    res.locals = {
+      ...res.locals,
+      payload,
+    };
+    next();
+  } catch (e) {
+    if (res.statusCode < 400) {
+      res.statusCode = 403;
+    }
     const message = generateErrorMesaage(e);
     res.send(message);
   }

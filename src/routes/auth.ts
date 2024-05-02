@@ -8,6 +8,7 @@ import {
   validateLogin,
   validateUserCredentials,
   checkEmailInUse,
+  verifyGoogleAuth,
 } from "@/middlewares/auth";
 import EmailVerification from "@/models/EmailVerification";
 import { generateErrorMesaage } from "@/utils/common";
@@ -68,5 +69,42 @@ AuthRouter.post(
     }
   },
 );
+
+AuthRouter.post("/google", verifyGoogleAuth, async (req, res) => {
+  try {
+    const { payload } = res.locals;
+
+    const existingUser = await User.findOne({
+      "email.value": payload?.email,
+    });
+
+    if (!existingUser) {
+      const newUser = new User({
+        firstName: payload?.given_name,
+        lastName: payload?.family_name,
+        email: {
+          value: payload?.email,
+          verified: true,
+        },
+      });
+
+      await newUser.save();
+
+      const token = signJWToken(newUser.id);
+      res.status(201).send({
+        token,
+        profile: newUser,
+      });
+    } else {
+      const token = signJWToken(existingUser.id);
+      res.status(200).send({
+        token,
+        profile: existingUser,
+      });
+    }
+  } catch (e) {
+    res.status(500).send(generateErrorMesaage(e));
+  }
+});
 
 export default AuthRouter;
