@@ -6,6 +6,7 @@ import {
   SIGN_UP_VALIDATION_SCHEMA,
 } from "@/validators/auth";
 import { generateErrorMesaage } from "@/utils/common";
+import axios from "axios";
 
 export const validatePasswordSignUp = async (
   req: Request,
@@ -32,7 +33,7 @@ export const checkEmailInUse = async (
     });
     if (existingProfile) {
       res.statusCode = 400;
-      next("Email already in use");
+      throw new Error("Email already in use");
     }
     next();
   } catch (e) {
@@ -66,7 +67,7 @@ export const validateUserCredentials = async (
     });
     if (!profile) {
       res.statusCode = 400;
-      next("No user found with such credentials");
+      throw new Error("No user found with such credentials");
     }
     if (profile?.password) {
       const passwordMatches = bcrypt.compareSync(
@@ -75,12 +76,43 @@ export const validateUserCredentials = async (
       );
       if (!passwordMatches) {
         res.statusCode = 400;
-        next("No user found with such credentials");
+        throw new Error("No user found with such credentials");
       }
     }
     res.locals = {
       ...res.locals,
       profile,
+    };
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.send(message);
+  }
+};
+
+export const verifyGoogleAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.body.token) {
+      res.statusCode = 400;
+      throw new Error("Token required");
+    }
+
+    const { data: googleProfile } = await axios.get(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${req.body.token}`,
+    );
+
+    if (!googleProfile) {
+      res.statusCode = 403;
+      throw new Error("No or invalid user detected.");
+    }
+
+    res.locals = {
+      ...res.locals,
+      payload: googleProfile,
     };
     next();
   } catch (e) {
