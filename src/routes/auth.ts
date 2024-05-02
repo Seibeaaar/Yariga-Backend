@@ -94,12 +94,14 @@ AuthRouter.post("/google", verifyGoogleAuth, async (req, res) => {
       res.status(201).send({
         token,
         profile: newUser,
+        isNew: true,
       });
     } else {
       const token = signJWToken(existingUser.id);
       res.status(200).send({
         token,
         profile: existingUser,
+        isNew: false,
       });
     }
   } catch (e) {
