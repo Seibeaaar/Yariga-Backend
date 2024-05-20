@@ -2,6 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
@@ -24,5 +26,14 @@ app.use("/agreements", AgreementRouter);
 app.use("/verification", VerificationRouter);
 app.use("/profile", ProfileRouter);
 
+const server = createServer(app);
+export const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+import "./socket";
+
 connectToDatabase();
-app.listen(5001);
+server.listen(5001);
