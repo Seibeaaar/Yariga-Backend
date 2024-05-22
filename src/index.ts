@@ -13,6 +13,7 @@ import PropertyRouter from "./routes/property";
 import AgreementRouter from "./routes/agreement";
 import VerificationRouter from "./routes/verification";
 import ProfileRouter from "./routes/profile";
+import NotificationRouter from "./routes/notification";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/property", PropertyRouter);
 app.use("/agreements", AgreementRouter);
 app.use("/verification", VerificationRouter);
 app.use("/profile", ProfileRouter);
+app.use("/notification", NotificationRouter);
 
 const server = createServer(app);
 export const io = new Server(server, {
