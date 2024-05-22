@@ -14,6 +14,8 @@ import { checkIfLandlord, checkIfClient } from "@/middlewares/profile";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
 import { generateErrorMesaage } from "@/utils/common";
 import { AGREEMENT_STATUS } from "@/enums/agreement";
+import { NOTIFICATION_TYPE } from "@/enums/notification";
+import { notifyAgreementCounterpart } from "@/utils/agreement";
 
 const AgreementRouter = Router();
 
@@ -55,6 +57,14 @@ AgreementRouter.post(
         },
       );
       res.status(201).send(agreement);
+
+      const { profile } = res.locals;
+
+      await notifyAgreementCounterpart(
+        profile.id,
+        NOTIFICATION_TYPE.AgreementCreate,
+        agreement.toObject(),
+      );
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -71,7 +81,7 @@ AgreementRouter.put(
   validateAgreementInfo,
   async (req, res) => {
     try {
-      const { sale } = res.locals;
+      const { sale, profile } = res.locals;
       const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
@@ -82,7 +92,15 @@ AgreementRouter.put(
           new: true,
         },
       );
+
       res.status(200).send(updatedSale);
+      // Notify always after the request is finished
+      // in order to avoid interrupting REST
+      await notifyAgreementCounterpart(
+        profile.id,
+        NOTIFICATION_TYPE.AgreementUpdate,
+        sale,
+      );
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -97,7 +115,7 @@ AgreementRouter.put(
   checkAgreementIdParam,
   async (req, res) => {
     try {
-      const { sale } = res.locals;
+      const { sale, profile } = res.locals;
       const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
@@ -117,6 +135,12 @@ AgreementRouter.put(
         },
       );
       res.status(200).send(updatedSale);
+
+      await notifyAgreementCounterpart(
+        profile.id,
+        NOTIFICATION_TYPE.AgreementSuccess,
+        updatedSale!.toObject(),
+      );
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -132,7 +156,7 @@ AgreementRouter.delete(
   checkAgreementIdParam,
   async (req, res) => {
     try {
-      const { sale } = res.locals;
+      const { sale, profile } = res.locals;
       await Agreement.findByIdAndDelete(sale.id);
       await Property.findByIdAndUpdate(
         sale.property,
@@ -166,6 +190,12 @@ AgreementRouter.delete(
         },
       );
       res.status(200).send("Successfully deleted a sale");
+
+      await notifyAgreementCounterpart(
+        profile.id,
+        NOTIFICATION_TYPE.AgreementCancel,
+        sale,
+      );
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -180,7 +210,7 @@ AgreementRouter.put(
   checkAgreementIdParam,
   async (req, res) => {
     try {
-      const { sale } = res.locals;
+      const { sale, profile } = res.locals;
       const updatedSale = await Agreement.findByIdAndUpdate(
         sale.id,
         {
@@ -200,6 +230,12 @@ AgreementRouter.put(
         },
       );
       res.status(200).send(updatedSale);
+
+      await notifyAgreementCounterpart(
+        profile.id,
+        NOTIFICATION_TYPE.AgreementCancel,
+        updatedSale!.toObject(),
+      );
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);

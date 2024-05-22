@@ -1,4 +1,5 @@
 import { AGREEMENT_STATUS, AGREEMENT_TYPE } from "@/enums/agreement";
+import { Notification } from "./notification";
 
 export type Agreement = {
   id: string;
@@ -10,4 +11,10 @@ export type Agreement = {
   type: AGREEMENT_TYPE;
   startDate: string;
   endDate?: string;
+};
+
+export type AgreementNotificationBody = {
+  agreement: Agreement | string;
+  message: string;
+  notification: Notification;
 };
