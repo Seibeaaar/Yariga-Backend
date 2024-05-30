@@ -20,7 +20,7 @@ export const sendVerificationEmail = async (
   requestId: string,
 ) => {
   try {
-    const verificationLink = `${process.env.CLIENT_APP_HOST}/email-verification?request=${requestId}`;
+    const verificationLink = `${process.env.Tenant_APP_HOST}/email-verification?request=${requestId}`;
     const info = await transporter.sendMail({
       from: process.env.ELASTIC_EMAIL_USER,
       to,

@@ -39,7 +39,7 @@ export const validateSellerInformation = async (
   body: ProfileCompletionRequest,
 ) => {
   const { taxNumber, role } = body;
-  if (role === USER_ROLE.Client) {
+  if (role === USER_ROLE.Tenant) {
     return;
   }
 

@@ -27,7 +27,7 @@ export const validatePropertyOwnerRole = async (
 ) => {
   try {
     const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Sole) {
+    if (profile.role !== USER_ROLE.Landlord) {
       res.statusCode = 403;
       next("You are not allowed to operate a property");
     }

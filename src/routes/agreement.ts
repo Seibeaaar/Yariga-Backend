@@ -17,6 +17,21 @@ import { AGREEMENT_STATUS } from "@/enums/agreement";
 
 const AgreementRouter = Router();
 
+AgreementRouter.get(
+  "/",
+  verifyJWToken,
+  extractProfileFromToken,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+      const agreements = await Agreement.findById(profile.id);
+      res.status(200).send(agreements);
+    } catch (e) {
+      res.status(500).send(generateErrorMesaage(e));
+    }
+  },
+);
+
 AgreementRouter.post(
   "/create",
   verifyJWToken,

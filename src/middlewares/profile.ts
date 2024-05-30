@@ -30,7 +30,7 @@ export const checkIfClient = async (
 ) => {
   try {
     const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Client) {
+    if (profile.role !== USER_ROLE.Tenant) {
       throw new Error("You are not allowed to perform this operation");
     }
     next();
@@ -51,7 +51,7 @@ export const checkIfLandlord = async (
 ) => {
   try {
     const { profile } = res.locals;
-    if (profile.role !== USER_ROLE.Sole) {
+    if (profile.role !== USER_ROLE.Landlord) {
       throw new Error("You are not allowed to perform this operation");
     }
     next();
