@@ -164,4 +164,26 @@ PropertyRouter.get(
   },
 );
 
+PropertyRouter.post("/search", verifyJWToken, async (req, res) => {
+  try {
+    const { q } = req.query;
+    // If query is empty - no need to throw an error
+    if (!q) {
+      res.status(200).send([]);
+    }
+    const regex = new RegExp(q as string, "i");
+    const results = await Property.find({
+      $or: [
+        { location: { $regex: regex } },
+        { description: { $regex: regex } },
+        { title: { $regex: regex } },
+      ],
+    }).exec();
+
+    res.status(200).send(results);
+  } catch (e) {
+    res.status(500).send(generateErrorMesaage(e));
+  }
+});
+
 export default PropertyRouter;
