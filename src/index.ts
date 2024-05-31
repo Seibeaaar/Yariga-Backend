@@ -1,28 +1,42 @@
-import express from "express";
-import helmet from "helmet";
 import dotenv from "dotenv";
-import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 dotenv.config();
 
+import expressApp from "./express";
 import { connectToDatabase } from "./utils/database";
-import AuthRouter from "./routes/auth";
-import PropertyRouter from "./routes/property";
-import AgreementRouter from "./routes/agreement";
-import VerificationRouter from "./routes/verification";
-import ProfileRouter from "./routes/profile";
+import { connectToSocket } from "./utils/socket";
 
-const app = express();
+const server = createServer(expressApp);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    next(new Error("Authorization token required"));
+  }
 
-app.use("/auth", AuthRouter);
-app.use("/property", PropertyRouter);
-app.use("/agreements", AgreementRouter);
-app.use("/verification", VerificationRouter);
-app.use("/profile", ProfileRouter);
+  jwt.verify(
+    token as string,
+    process.env.JWT_SECRET as string,
+    (err, decoded) => {
+      if (err) {
+        next(new Error("Invalid token"));
+      } else {
+        const { data } = decoded as JwtPayload;
+        socket.handshake.headers.userId = data;
+        next();
+      }
+    },
+  );
+});
 
 connectToDatabase();
-app.listen(5001);
+io.on("connection", connectToSocket);
+server.listen(5001);
