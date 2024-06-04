@@ -46,9 +46,9 @@ AgreementRouter.post(
         status: AGREEMENT_STATUS.Pending,
       });
       await agreement.save();
-      const { seller, buyer } = req.body;
+
       await User.findByIdAndUpdate(
-        seller,
+        agreement.seller,
         {
           $push: {
             agreements: agreement.id,
@@ -59,7 +59,7 @@ AgreementRouter.post(
         },
       );
       await User.findByIdAndUpdate(
-        buyer,
+        agreement.buyer,
         {
           $push: {
             agreements: agreement.id,

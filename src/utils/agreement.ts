@@ -1,4 +1,5 @@
 import Agreement from "@/models/Agreement";
+import { Agreement as AgreementType } from "@/types/agreement";
 
 export const checkIfAgreementExists = async (id?: string) => {
   if (!id) {
@@ -12,4 +13,12 @@ export const checkIfAgreementExists = async (id?: string) => {
   }
 
   return agreement;
+};
+
+export const getAgreementCounterpart = (
+  agreement: AgreementType,
+  id: string,
+): string => {
+  const { buyer, seller } = agreement;
+  return [buyer, seller].find((s) => s === id)!;
 };

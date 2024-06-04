@@ -1,14 +1,33 @@
 import { Socket } from "socket.io";
+import Connection from "@/models/Connection";
 
-export const CONNECTED_USERS: {
-  [key: string]: string;
-} = {};
-
-export const connectToSocket = (socket: Socket) => {
+export const connectToSocket = async (socket: Socket) => {
   const userId = socket.handshake.headers.userId as string;
-  CONNECTED_USERS[userId] = socket.id;
 
-  socket.on("disconnect", () => {
-    if (CONNECTED_USERS[userId]) delete CONNECTED_USERS[userId];
+  await Connection.findOneAndDelete({
+    user: userId,
   });
+
+  const newConnection = new Connection({
+    user: userId,
+    socket: socket.id,
+  });
+
+  await newConnection.save();
+
+  socket.on("disconnect", async () => {
+    await Connection.findOneAndDelete({
+      user: userId,
+    });
+  });
+};
+
+export const getCounterpartConnection = async (counterpart: string) => {
+  try {
+    return await Connection.findOne({
+      user: counterpart,
+    });
+  } catch (e) {
+    return null;
+  }
 };
