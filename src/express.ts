@@ -7,6 +7,8 @@ import PropertyRouter from "./routes/property";
 import AgreementRouter from "./routes/agreement";
 import VerificationRouter from "./routes/verification";
 import ProfileRouter from "./routes/profile";
+import ChatRouter from "./routes/chats";
+import MessageRouter from "./routes/messages";
 
 const app = express();
 
@@ -19,5 +21,7 @@ app.use("/property", PropertyRouter);
 app.use("/agreements", AgreementRouter);
 app.use("/verification", VerificationRouter);
 app.use("/profile", ProfileRouter);
+app.use("/chats", ChatRouter);
+app.use("/messages", MessageRouter);
 
 export default app;

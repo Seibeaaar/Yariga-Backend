@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-import { USER_ROLES } from "@/constants/users";
 import ClientPreferencesSchema from "./ClientPreferences";
+import { USER_ROLE } from "@/enums/user";
 
 const RoleBasedFields = {
   agreements: {
@@ -75,7 +75,7 @@ const UserSchema = new Schema({
   role: {
     type: String,
     enum: {
-      values: USER_ROLES,
+      values: Object.values(USER_ROLE),
     },
   },
   ...RoleBasedFields,

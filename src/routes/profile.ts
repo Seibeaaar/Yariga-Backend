@@ -62,7 +62,7 @@ ProfileRouter.post(
           new: true,
         },
       );
-      res.status(200).send(omit(completedProfile?.toObject, "password"));
+      res.status(200).send(omit(completedProfile?.toObject(), "password"));
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);

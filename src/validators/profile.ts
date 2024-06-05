@@ -3,7 +3,6 @@ import dayjs from "dayjs";
 
 import User from "@/models/User";
 import { TAX_NUMBER_REGEX } from "@/constants/users";
-import { USER_ROLES } from "@/constants/users";
 import { USER_ROLE } from "@/enums/user";
 import { ProfileCompletionRequest } from "@/types/profile";
 
@@ -16,7 +15,7 @@ export const POST_AUTH_VALIDATION_SCHEMA = yup.object({
       const currentDate = dayjs();
       return customDate.isValid() && currentDate.diff(customDate, "y") >= 18;
     }),
-  role: yup.string().required("Role required").oneOf(USER_ROLES),
+  role: yup.string().required("Role required").oneOf(Object.values(USER_ROLE)),
 });
 
 const validateTaxNumber = async (taxNumber?: string) => {
