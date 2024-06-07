@@ -21,9 +21,6 @@ const MessageSchema = new Schema({
     type: String,
     required: true,
   },
-  media: {
-    type: String,
-  },
   responseTo: {
     type: Schema.Types.ObjectId,
     ref: "Message",
@@ -32,7 +29,6 @@ const MessageSchema = new Schema({
   chat: {
     type: Schema.Types.ObjectId,
     ref: "Chat",
-    required: true,
   },
 });
 
