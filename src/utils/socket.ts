@@ -22,11 +22,16 @@ export const connectToSocket = async (socket: Socket) => {
   });
 };
 
-export const getCounterpartConnection = async (counterpart: string) => {
+export const getCounterpartConnection = async (
+  sides: string[],
+  profileId: string,
+) => {
+  const counterPart = sides.find((s) => s !== profileId);
   try {
-    return await Connection.findOne({
-      user: counterpart,
+    const connection = await Connection.findOne({
+      user: counterPart,
     });
+    return connection?.socket;
   } catch (e) {
     return null;
   }

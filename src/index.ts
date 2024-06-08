@@ -10,7 +10,7 @@ import { connectToDatabase } from "./utils/database";
 import { connectToSocket } from "./utils/socket";
 
 const server = createServer(expressApp);
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: "*",
   },
