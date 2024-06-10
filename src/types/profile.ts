@@ -7,3 +7,16 @@ export type ProfileCompletionRequest = {
   licenseNumber?: string;
   dateOfBirth: string;
 };
+
+export type Profile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: {
+    value: string;
+    verified: true;
+  };
+  role: USER_ROLE;
+  dateOfBirth: string;
+  profilePicture?: string;
+};
