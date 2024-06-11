@@ -7,10 +7,6 @@ import { generateErrorMesaage } from "@/utils/common";
 import { checkCanCreateChat, validateChatInRequest } from "@/middlewares/chats";
 import { validateMessage } from "@/middlewares/messages";
 
-import { io } from "../index";
-import { getCounterpartConnection } from "@/utils/socket";
-import { CHAT_EVENTS } from "@/enums/chats";
-
 const ChatRouter = Router();
 
 ChatRouter.get(
@@ -38,9 +34,8 @@ ChatRouter.post(
   extractProfileFromToken,
   checkCanCreateChat,
   validateMessage,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
-      const { profile } = res.locals;
       const { sender, receiver } = req.body;
 
       const message = new Message(req.body);
@@ -58,16 +53,8 @@ ChatRouter.post(
         .populate("messages")
         .populate("participants", "firstName lastName profilePicture");
 
-      const counterpartConnection = await getCounterpartConnection(
-        [sender, receiver],
-        profile.id,
-      );
-
-      if (counterpartConnection) {
-        io.to(counterpartConnection).emit(CHAT_EVENTS.ChatCreated, chatData);
-      }
-
       res.status(200).send(chatData);
+      next();
     } catch (e) {
       res.status(500).send(generateErrorMesaage(e));
     }
@@ -80,9 +67,9 @@ ChatRouter.post(
   extractProfileFromToken,
   validateChatInRequest,
   validateMessage,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
-      const { chat, profile } = res.locals;
+      const { chat } = res.locals;
       const message = new Message({
         ...req.body,
         chat: chat.id,
@@ -95,16 +82,8 @@ ChatRouter.post(
         },
       });
 
-      const counterpartConnection = await getCounterpartConnection(
-        chat.participants,
-        profile.id,
-      );
-
-      if (counterpartConnection) {
-        io.to(counterpartConnection).emit(CHAT_EVENTS.MessageSent, message);
-      }
-
       res.status(200).send(message);
+      next();
     } catch (e) {
       res.status(500).send(generateErrorMesaage(e));
     }
@@ -116,9 +95,9 @@ ChatRouter.delete(
   verifyJWToken,
   extractProfileFromToken,
   validateChatInRequest,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
-      const { chat, profile } = res.locals;
+      const { chat } = res.locals;
       await Message.deleteMany({
         _id: {
           $in: chat.messages,
@@ -127,16 +106,8 @@ ChatRouter.delete(
 
       await chat.deleteOne();
 
-      const counterpartConnection = await getCounterpartConnection(
-        chat.participants,
-        profile.id,
-      );
-
-      if (counterpartConnection) {
-        io.to(counterpartConnection).emit(CHAT_EVENTS.ChatDeleted, chat.id);
-      }
-
       res.status(200).send(`Chat ${chat.id} deleted`);
+      next();
     } catch (e) {
       res.status(500).send(generateErrorMesaage(e));
     }

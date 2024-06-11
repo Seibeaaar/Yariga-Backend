@@ -1,4 +1,5 @@
 import { USER_ROLE } from "@/enums/user";
+import { Profile } from "@/types/profile";
 
 export const generateRoleBasedFields = (role: USER_ROLE) => {
   switch (role) {
@@ -16,3 +17,6 @@ export const generateRoleBasedFields = (role: USER_ROLE) => {
       throw new Error("Role is not recognized");
   }
 };
+
+export const buildFullName = (profile: Profile) =>
+  `${profile.firstName} ${profile.lastName}`;

@@ -1,5 +1,7 @@
 import { Socket } from "socket.io";
 import Connection from "@/models/Connection";
+import { generateErrorMesaage } from "./common";
+import { io } from "..";
 
 export const connectToSocket = async (socket: Socket) => {
   const userId = socket.handshake.headers.userId as string;
@@ -22,17 +24,20 @@ export const connectToSocket = async (socket: Socket) => {
   });
 };
 
-export const getCounterpartConnection = async (
-  sides: string[],
-  profileId: string,
+export const emitEvent = async (
+  data: object,
+  receiver: string,
+  event: string,
 ) => {
-  const counterPart = sides.find((s) => s !== profileId);
   try {
-    const connection = await Connection.findOne({
-      user: counterPart,
+    const counterpartConnection = await Connection.findOne({
+      user: receiver,
     });
-    return connection?.socket;
+    if (counterpartConnection) {
+      const socket = counterpartConnection.socket;
+      io.to(socket).emit(event, data);
+    }
   } catch (e) {
-    return null;
+    throw new Error(generateErrorMesaage(e));
   }
 };

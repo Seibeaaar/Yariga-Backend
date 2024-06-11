@@ -1,22 +1,30 @@
 import { Request, Response } from "express";
 
-import { NotificationHandler } from "@/utils/notification";
+import {
+  constructAgreementNotification,
+  sendNotification,
+} from "@/utils/notification";
 import { NOTIFICATION_TYPE } from "@/enums/notification";
 import { generateErrorMesaage } from "@/utils/common";
+import { getAgreementCounterpart } from "@/utils/agreement";
 
 export const notifyAgreementCreated = async (req: Request, res: Response) => {
   try {
     const { property, profile, agreement } = res.locals;
 
-    const notificationHandler = new NotificationHandler(
-      property,
-      profile,
-      agreement,
+    const content = constructAgreementNotification(
       NOTIFICATION_TYPE.AgreementCreate,
+      property.title,
     );
-    const notification = await notificationHandler.createNotification();
 
-    await notificationHandler.sendNotification(notification.toObject());
+    const receiver = getAgreementCounterpart(agreement, profile.id);
+
+    await sendNotification(
+      content,
+      NOTIFICATION_TYPE.AgreementCreate,
+      profile.id,
+      receiver,
+    );
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
@@ -26,15 +34,19 @@ export const notifyAgreementUpdated = async (req: Request, res: Response) => {
   try {
     const { sale, property, profile } = res.locals;
 
-    const notificationHandler = new NotificationHandler(
-      property,
-      profile,
-      sale,
+    const content = constructAgreementNotification(
       NOTIFICATION_TYPE.AgreementCreate,
+      property.title,
     );
-    const notification = await notificationHandler.createNotification();
 
-    await notificationHandler.sendNotification(notification.toObject());
+    const receiver = getAgreementCounterpart(sale, profile.id);
+
+    await sendNotification(
+      content,
+      NOTIFICATION_TYPE.AgreementUpdate,
+      profile.id,
+      receiver,
+    );
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
@@ -44,15 +56,19 @@ export const notifyAgreementAccepted = async (req: Request, res: Response) => {
   try {
     const { sale, profile, property } = res.locals;
 
-    const notificationHandler = new NotificationHandler(
-      property,
-      profile,
-      sale,
-      NOTIFICATION_TYPE.AgreementCreate,
+    const content = constructAgreementNotification(
+      NOTIFICATION_TYPE.AgreementSuccess,
+      property.title,
     );
-    const notification = await notificationHandler.createNotification();
 
-    await notificationHandler.sendNotification(notification.toObject());
+    const receiver = getAgreementCounterpart(sale, profile.id);
+
+    await sendNotification(
+      content,
+      NOTIFICATION_TYPE.AgreementSuccess,
+      profile.id,
+      receiver,
+    );
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
@@ -62,15 +78,19 @@ export const notifyAgreementCanceled = async (req: Request, res: Response) => {
   try {
     const { sale, profile, property } = res.locals;
 
-    const notificationHandler = new NotificationHandler(
-      property,
-      profile,
-      sale,
-      NOTIFICATION_TYPE.AgreementCreate,
+    const content = constructAgreementNotification(
+      NOTIFICATION_TYPE.AgreementCancel,
+      property.title,
     );
-    const notification = await notificationHandler.createNotification();
 
-    await notificationHandler.sendNotification(notification.toObject());
+    const receiver = getAgreementCounterpart(sale, profile.id);
+
+    await sendNotification(
+      content,
+      NOTIFICATION_TYPE.AgreementCancel,
+      profile.id,
+      receiver,
+    );
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
@@ -80,15 +100,19 @@ export const notifyAgreementCompleted = async (req: Request, res: Response) => {
   try {
     const { sale, profile, property } = res.locals;
 
-    const notificationHandler = new NotificationHandler(
-      property,
-      profile,
-      sale,
-      NOTIFICATION_TYPE.AgreementCreate,
+    const content = constructAgreementNotification(
+      NOTIFICATION_TYPE.PaymentSucces,
+      property.title,
     );
-    const notification = await notificationHandler.createNotification();
 
-    await notificationHandler.sendNotification(notification.toObject());
+    const receiver = getAgreementCounterpart(sale, profile.id);
+
+    await sendNotification(
+      content,
+      NOTIFICATION_TYPE.PaymentSucces,
+      profile.id,
+      receiver,
+    );
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
