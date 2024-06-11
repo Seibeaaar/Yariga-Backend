@@ -4,7 +4,7 @@ import cors from "cors";
 
 import AuthRouter from "./routes/auth";
 import PropertyRouter from "./routes/property";
-import AgreementRouter from "./routes/agreement";
+import AgreementRouter from "./routes/agreements";
 import VerificationRouter from "./routes/verification";
 import ProfileRouter from "./routes/profile";
 import ChatRouter from "./routes/chats";
