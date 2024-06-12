@@ -35,7 +35,10 @@ export const validateAgreementInfo = async (
 ) => {
   try {
     const { endDate, startDate, type, property, buyer, seller } = req.body;
-    await checkIfPropertyExists(property);
+    const propertyDoc = await checkIfPropertyExists(property);
+    res.locals = {
+      property: propertyDoc,
+    };
     await validateSidesOfAgreement(buyer, seller);
     validateAgreementStartDate(startDate);
     validateAgreementEndDate(startDate, type, endDate);
