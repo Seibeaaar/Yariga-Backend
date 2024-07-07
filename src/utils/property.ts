@@ -7,7 +7,7 @@ import {
   BED_LIMIT,
   ROOM_LIMIT,
 } from "@/enums/property";
-import { PROPERTY_STATUSES } from "@/constants/property";
+import { PROPERTY_ITEMS_LIMIT, PROPERTY_STATUSES } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 
 export const checkIfPropertyExists = async (id?: string) => {
@@ -27,9 +27,11 @@ export const checkIfPropertyExists = async (id?: string) => {
 export const getPropertyRecommendations = async (
   filters: PropertyFilters,
   landlords: string[],
+  page?: string,
 ) => {
   const queryByFilters = generatePropertyFilterQuery(filters);
-  const results = await Property.aggregate([
+  const pageNumber = processPageQueryParam(page);
+  const recommendations = await Property.aggregate([
     {
       $facet: {
         landlordsProperties: [
@@ -66,11 +68,21 @@ export const getPropertyRecommendations = async (
       $replaceRoot: { newRoot: "$properties" },
     },
     {
-      $limit: 500,
+      $skip: (pageNumber - 1) * PROPERTY_ITEMS_LIMIT,
+    },
+    {
+      $limit: PROPERTY_ITEMS_LIMIT,
     },
   ]);
 
-  return results;
+  const total = recommendations.length;
+
+  return {
+    recommendations,
+    total,
+    pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),
+    page: pageNumber,
+  };
 };
 
 export const generatePropertyFilterQuery = (filters: PropertyFilters) => {
@@ -111,4 +123,9 @@ export const generatePropertyFilterQuery = (filters: PropertyFilters) => {
       $in: filters.status ?? PROPERTY_STATUSES,
     },
   };
+};
+
+export const processPageQueryParam = (page?: string) => {
+  if (!page || Number.isNaN(+page)) return 1;
+  return +page;
 };

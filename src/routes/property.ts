@@ -18,8 +18,10 @@ import { PropertyFilters } from "@/types/property";
 import {
   generatePropertyFilterQuery,
   getPropertyRecommendations,
+  processPageQueryParam,
 } from "@/utils/property";
 import Agreement from "@/models/Agreement";
+import { PROPERTY_ITEMS_LIMIT } from "@/constants/property";
 
 const PropertyRouter = Router();
 
@@ -126,9 +128,22 @@ PropertyRouter.post(
   validatePropertyFilters,
   async (req, res) => {
     try {
+      const { page } = req.query;
       const filters = req.body as PropertyFilters;
-      const results = await Property.find(generatePropertyFilterQuery(filters));
-      res.status(200).send(results);
+      const pageNumber = processPageQueryParam(page as string | undefined);
+      const startIndex = (pageNumber - 1) * PROPERTY_ITEMS_LIMIT;
+
+      const results = await Property.find(generatePropertyFilterQuery(filters))
+        .skip(startIndex)
+        .limit(PROPERTY_ITEMS_LIMIT);
+      const total = results.length;
+
+      res.status(200).send({
+        properties: results,
+        total,
+        page: pageNumber,
+        pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),
+      });
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -146,16 +161,21 @@ PropertyRouter.get(
       const {
         profile: { preferences, agreements },
       } = res.locals;
+      const { page } = req.query;
+
       const agreementDocs = await Agreement.find({
         _id: {
           $in: agreements,
         },
       });
+
       const previousLandlords = agreementDocs.map((a) => a.seller.toString());
       const results = await getPropertyRecommendations(
         preferences,
         previousLandlords,
+        page as string | undefined,
       );
+
       res.status(200).send(results);
     } catch (e) {
       const message = generateErrorMesaage(e);
@@ -164,13 +184,35 @@ PropertyRouter.get(
   },
 );
 
+PropertyRouter.get("/", verifyJWToken, async (req, res) => {
+  try {
+    const { page } = req.query;
+
+    const pageNumber = processPageQueryParam(page as string | undefined);
+    const startIndex = (pageNumber - 1) * PROPERTY_ITEMS_LIMIT;
+    const total = await Property.countDocuments();
+
+    const properties = await Property.find()
+      .skip(startIndex)
+      .limit(PROPERTY_ITEMS_LIMIT);
+
+    res.status(200).send({
+      properties,
+      total,
+      page: pageNumber,
+      pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),
+    });
+  } catch (e) {
+    res.status(500).send(generateErrorMesaage(e));
+  }
+});
+
 PropertyRouter.post("/search", verifyJWToken, async (req, res) => {
   try {
-    const { q } = req.query;
-    // If query is empty - no need to throw an error
-    if (!q) {
-      res.status(200).send([]);
-    }
+    const { q = "", page } = req.query;
+
+    const pageNumber = processPageQueryParam(page as string | undefined);
+    const startIndex = (pageNumber - 1) * PROPERTY_ITEMS_LIMIT;
     const regex = new RegExp(q as string, "i");
     const results = await Property.find({
       $or: [
@@ -178,9 +220,19 @@ PropertyRouter.post("/search", verifyJWToken, async (req, res) => {
         { description: { $regex: regex } },
         { title: { $regex: regex } },
       ],
-    }).exec();
+    })
+      .skip(startIndex)
+      .limit(PROPERTY_ITEMS_LIMIT)
+      .exec();
 
-    res.status(200).send(results);
+    const total = results.length;
+
+    res.status(200).send({
+      results,
+      page: pageNumber,
+      total,
+      pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),
+    });
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));
   }
