@@ -24,3 +24,6 @@ export const PROPERTY_FACILITIES = [
   "balcony",
   "wiFi",
 ];
+
+export const PROPERTY_ITEMS_LIMIT = 2;
+export const RECOMMENDATIONS_LIMIT = 50;
