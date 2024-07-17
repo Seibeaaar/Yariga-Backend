@@ -1,6 +1,5 @@
 import { Router } from "express";
 import Property from "@/models/Property";
-import { omit } from "lodash";
 import User from "@/models/User";
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
 import {
@@ -45,7 +44,9 @@ PropertyRouter.post(
         status: PROPERTY_STATUS.Free,
         photos: propertyPhotos.map((photo) => photo.location),
       });
-      const updatedProfile = await User.findByIdAndUpdate(
+      await property.save();
+
+      await User.findByIdAndUpdate(
         profile.id,
         {
           $push: {
@@ -54,11 +55,8 @@ PropertyRouter.post(
         },
         { new: true },
       );
-      await property.save();
-      res.status(201).send({
-        profile: omit(updatedProfile?.toObject(), "password"),
-        property,
-      });
+
+      res.status(201).send(property);
     } catch (e) {
       const message = generateErrorMesaage(e);
       res.status(500).send(message);
@@ -121,6 +119,26 @@ PropertyRouter.delete(
   },
 );
 
+PropertyRouter.get(
+  "/mine",
+  verifyJWToken,
+  checkIfLandlord,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+
+      const properties = await Property.find({
+        owner: profile.id,
+      });
+
+      res.status(200).send(properties);
+    } catch (e) {
+      const message = generateErrorMesaage(e);
+      res.status(500).send(message);
+    }
+  },
+);
+
 PropertyRouter.post(
   "/filter",
   verifyJWToken,
@@ -161,7 +179,6 @@ PropertyRouter.get(
       const {
         profile: { preferences, agreements },
       } = res.locals;
-      const { page } = req.query;
 
       const agreementDocs = await Agreement.find({
         _id: {
@@ -173,7 +190,6 @@ PropertyRouter.get(
       const results = await getPropertyRecommendations(
         preferences,
         previousLandlords,
-        page as string | undefined,
       );
 
       res.status(200).send(results);
@@ -228,7 +244,7 @@ PropertyRouter.post("/search", verifyJWToken, async (req, res) => {
     const total = results.length;
 
     res.status(200).send({
-      results,
+      properties: results,
       page: pageNumber,
       total,
       pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),

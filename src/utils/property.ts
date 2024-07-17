@@ -7,7 +7,7 @@ import {
   BED_LIMIT,
   ROOM_LIMIT,
 } from "@/enums/property";
-import { PROPERTY_ITEMS_LIMIT, PROPERTY_STATUSES } from "@/constants/property";
+import { PROPERTY_STATUSES, RECOMMENDATIONS_LIMIT } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 
 export const checkIfPropertyExists = async (id?: string) => {
@@ -27,10 +27,8 @@ export const checkIfPropertyExists = async (id?: string) => {
 export const getPropertyRecommendations = async (
   filters: PropertyFilters,
   landlords: string[],
-  page?: string,
 ) => {
   const queryByFilters = generatePropertyFilterQuery(filters);
-  const pageNumber = processPageQueryParam(page);
   const recommendations = await Property.aggregate([
     {
       $facet: {
@@ -68,21 +66,14 @@ export const getPropertyRecommendations = async (
       $replaceRoot: { newRoot: "$properties" },
     },
     {
-      $skip: (pageNumber - 1) * PROPERTY_ITEMS_LIMIT,
+      $sort: { "properties.rating": -1 },
     },
     {
-      $limit: PROPERTY_ITEMS_LIMIT,
+      $limit: RECOMMENDATIONS_LIMIT,
     },
   ]);
 
-  const total = recommendations.length;
-
-  return {
-    recommendations,
-    total,
-    pages: Math.ceil(total / PROPERTY_ITEMS_LIMIT),
-    page: pageNumber,
-  };
+  return recommendations;
 };
 
 export const generatePropertyFilterQuery = (filters: PropertyFilters) => {

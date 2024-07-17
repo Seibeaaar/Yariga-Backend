@@ -26,3 +26,4 @@ export const PROPERTY_FACILITIES = [
 ];
 
 export const PROPERTY_ITEMS_LIMIT = 2;
+export const RECOMMENDATIONS_LIMIT = 50;
