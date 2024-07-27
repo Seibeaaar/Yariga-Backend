@@ -210,7 +210,8 @@ PropertyRouter.get("/", verifyJWToken, async (req, res) => {
 
     const properties = await Property.find()
       .skip(startIndex)
-      .limit(PROPERTY_ITEMS_LIMIT);
+      .limit(PROPERTY_ITEMS_LIMIT)
+      .populate("owner", "firstName lastName profilePicture properties");
 
     res.status(200).send({
       properties,
