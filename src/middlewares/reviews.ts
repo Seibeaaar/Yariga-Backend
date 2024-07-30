@@ -12,7 +12,8 @@ export const validateUserReviewBody = async (
 ) => {
   try {
     await UserReview.validate(req.body);
-    await checkIfUserExists(req.body.receiver);
+    const receiver = await checkIfUserExists(req.body.receiver);
+    req.body.receiver = receiver;
     next();
   } catch (e) {
     res.status(400).send(generateErrorMesaage(e));
@@ -53,7 +54,7 @@ export const checkUserReviewIdParam = async (
       res.statusCode = 404;
       throw new Error(`No user review with id ${req.params.id} found!`);
     }
-    res.locals.userReview = review;
+    res.locals.userReview = review.populate("user", "rating votes");
     next();
   } catch (e) {
     res.send(generateErrorMesaage(e));
@@ -76,7 +77,7 @@ export const checkPropertyReviewIdParam = async (
       res.statusCode = 404;
       throw new Error(`No property review with id ${req.params.id} found!`);
     }
-    res.locals.propertyReview = review;
+    res.locals.propertyReview = review.populate("property", "rating votes");
     next();
   } catch (e) {
     res.send(generateErrorMesaage(e));
@@ -108,7 +109,8 @@ export const validatePropertyReviewBody = async (
 ) => {
   try {
     await PropertyReview.validate(req.body);
-    await checkIfPropertyExists(req.body.property);
+    const property = await checkIfPropertyExists(req.body.property);
+    res.locals.property = property;
     next();
   } catch (e) {
     res.status(400).send(generateErrorMesaage(e));

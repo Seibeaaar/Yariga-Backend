@@ -70,6 +70,12 @@ const UserSchema = new Schema({
   ],
   rating: {
     type: Number,
+    min: 0,
+    max: 5,
+    default: 0,
+  },
+  votes: {
+    type: Number,
     default: 0,
   },
   role: {
