@@ -9,6 +9,7 @@ import VerificationRouter from "./routes/verification";
 import ProfileRouter from "./routes/profile";
 import ChatRouter from "./routes/chats";
 import MessageRouter from "./routes/messages";
+import ReviewRouter from "./routes/reviews";
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use("/verification", VerificationRouter);
 app.use("/profile", ProfileRouter);
 app.use("/chats", ChatRouter);
 app.use("/messages", MessageRouter);
+app.use("/reviews", ReviewRouter);
 
 export default app;

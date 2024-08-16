@@ -10,11 +10,7 @@ import {
 import { PROPERTY_STATUSES, RECOMMENDATIONS_LIMIT } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 
-export const checkIfPropertyExists = async (id?: string) => {
-  if (!id) {
-    throw new Error("No property id provided");
-  }
-
+export const checkIfPropertyExists = async (id: string) => {
   const existingProperty = await Property.findById(id);
 
   if (!existingProperty) {
