@@ -54,7 +54,21 @@ export const PROPERTY_VALIDATION_SCHEMA = yup.object({
     .required("Number of floors required")
     .min(FLOOR_LIMIT.Min, "At least one floor")
     .max(FLOOR_LIMIT.Max, "Should not exceed 100 floors"),
-  location: yup.string().required("Location required"),
+  location: yup
+    .object({
+      name: yup.string().required("Location name required"),
+      lat: yup
+        .number()
+        .required("Latitude required")
+        .min(-180, "Latitude cannot be lower than -180")
+        .max(180, "Latitude cannot be higher than 180"),
+      lon: yup
+        .number()
+        .required("Longitude required")
+        .min(-90, "Longitude cannot be lower than -90")
+        .max(90, "Longitude cannot be higher than 90"),
+    })
+    .required("Location data required"),
   floorLevel: yup.number().when("type", ([type], schema) => {
     return ELEVATED_PROPERTY_TYPES.includes(type)
       ? schema.required().min(1, "Should be at least on the first floor")

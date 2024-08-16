@@ -67,8 +67,18 @@ const PropertySchema = new Schema({
     default: 1,
   },
   location: {
-    type: String,
-    required: true,
+    name: {
+      type: String,
+      required: true,
+    },
+    lat: {
+      type: Number,
+      required: true,
+    },
+    lon: {
+      type: Number,
+      required: true,
+    },
   },
   floorLevel: Number,
   facilities: [
