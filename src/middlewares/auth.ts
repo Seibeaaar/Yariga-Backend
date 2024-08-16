@@ -29,7 +29,7 @@ export const checkEmailInUse = async (
 ) => {
   try {
     const existingProfile = await User.findOne({
-      "email.value": req.body.email,
+      email: req.body.email,
     });
     if (existingProfile) {
       res.statusCode = 400;

@@ -10,9 +10,7 @@ import {
   checkEmailInUse,
   verifyGoogleAuth,
 } from "@/middlewares/auth";
-import EmailVerification from "@/models/EmailVerification";
 import { generateErrorMesaage } from "@/utils/common";
-import { sendVerificationEmail } from "@/utils/verification";
 
 const AuthRouter = Router();
 
@@ -24,21 +22,8 @@ AuthRouter.post(
     try {
       const profile = new User({
         ...req.body,
-        email: {
-          value: req.body.email,
-          verified: false,
-        },
       });
       await profile.save();
-      const emailVerificationRequest = new EmailVerification({
-        email: req.body.email,
-      });
-      await emailVerificationRequest.save();
-      await sendVerificationEmail(
-        req.body.email,
-        `${req.body.firstName} ${req.body.lastName}`,
-        emailVerificationRequest.id,
-      );
       const token = signJWToken(profile.id);
       res.status(201).send({
         token,
