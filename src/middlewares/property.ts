@@ -13,7 +13,6 @@ export const validatePropertyData = async (
   next: NextFunction,
 ) => {
   try {
-    console.log(req.body);
     await PROPERTY_VALIDATION_SCHEMA.validate(req.body);
     next();
   } catch (e) {
