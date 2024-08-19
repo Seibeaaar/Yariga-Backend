@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { validateSellerInformation } from "@/validators/profile";
 import { POST_AUTH_VALIDATION_SCHEMA } from "@/validators/profile";
 import { generateErrorMesaage } from "@/utils/common";
 import { USER_ROLE } from "@/enums/user";
@@ -11,7 +10,6 @@ export const validateProfileCompletion = async (
 ) => {
   try {
     await POST_AUTH_VALIDATION_SCHEMA.validate(req.body);
-    await validateSellerInformation(req.body);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);

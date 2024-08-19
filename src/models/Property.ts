@@ -6,6 +6,7 @@ import {
 } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
 import { validateDescription } from "@/validators/property";
+import { PAYMENT_PERIOD, RENT_PERIOD_TIMEFRAME } from "@/enums/agreement";
 
 const PropertySchema = new Schema({
   title: {
@@ -98,6 +99,25 @@ const PropertySchema = new Schema({
   votes: {
     type: Number,
     default: 0,
+  },
+  paymentPeriod: {
+    type: String,
+    required: true,
+    enum: {
+      values: Object.values(PAYMENT_PERIOD),
+    },
+  },
+  minimumRentPeriod: {
+    value: {
+      type: Number,
+      min: 1,
+    },
+    period: {
+      type: String,
+      enum: {
+        values: Object.values(RENT_PERIOD_TIMEFRAME),
+      },
+    },
   },
 });
 
