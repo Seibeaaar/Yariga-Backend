@@ -2,18 +2,82 @@ import { Request, Response, NextFunction } from "express";
 import Agreement from "@/models/Agreement";
 import {
   validateAgreementEndDate,
-  validateAgreementStartDate,
   validateSidesOfAgreement,
 } from "@/validators/agreement";
+import SaleAgreement from "@/models/Agreement/SaleAgreement";
+import RentAgreement from "@/models/Agreement/RentAgreement";
 import { generateErrorMesaage } from "@/utils/common";
 import { checkIfAgreementExists } from "@/utils/agreement";
 import { checkIfPropertyExists } from "@/utils/property";
 
-/**
- * Checks request body if it includes required fields
- * Checks a validity of start and end dates of a sale
- * @throws Bad Request if an error occurs
- */
+export const validateSaleAgreementBody = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await SaleAgreement.validate(req.body);
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
+export const validateRentAgreementBody = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await RentAgreement.validate(req.body);
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
+export const validateSaleAgreementInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { buyer, seller, property } = req.body;
+    const propertyDoc = await checkIfPropertyExists(property);
+    res.locals = {
+      property: propertyDoc,
+    };
+    await validateSidesOfAgreement(buyer, seller);
+
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
+export const validateRentAgreementInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { buyer, seller, property, endDate, startDate } = req.body;
+    const propertyDoc = await checkIfPropertyExists(property);
+    res.locals = {
+      property: propertyDoc,
+    };
+    await validateSidesOfAgreement(buyer, seller);
+    await validateAgreementEndDate(startDate, endDate);
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
 export const validateAgreementBody = async (
   req: Request,
   res: Response,
@@ -34,14 +98,12 @@ export const validateAgreementInfo = async (
   next: NextFunction,
 ) => {
   try {
-    const { endDate, startDate, type, property, buyer, seller } = req.body;
+    const { property, buyer, seller } = req.body;
     const propertyDoc = await checkIfPropertyExists(property);
     res.locals = {
       property: propertyDoc,
     };
     await validateSidesOfAgreement(buyer, seller);
-    validateAgreementStartDate(startDate);
-    validateAgreementEndDate(startDate, type, endDate);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
@@ -49,11 +111,6 @@ export const validateAgreementInfo = async (
   }
 };
 
-/**
- * Checks if ID is passed as a req param
- * Checks if a sale with the id exists and passes it in locals
- * @throws Bad Request in case of error
- */
 export const checkAgreementIdParam = async (
   req: Request,
   res: Response,
@@ -64,6 +121,42 @@ export const checkAgreementIdParam = async (
     res.locals = {
       ...res.locals,
       sale,
+    };
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
+export const checkRentAgreementIdParam = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const agreement = await RentAgreement.findById(req.params.id);
+    res.locals = {
+      ...res.locals,
+      agreement,
+    };
+    next();
+  } catch (e) {
+    const message = generateErrorMesaage(e);
+    res.status(400).send(message);
+  }
+};
+
+export const checkSaleAgreementIdParam = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const agreement = await SaleAgreement.findById(req.params.id);
+    res.locals = {
+      ...res.locals,
+      agreement,
     };
     next();
   } catch (e) {
