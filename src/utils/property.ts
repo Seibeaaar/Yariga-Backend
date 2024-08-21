@@ -6,6 +6,7 @@ import {
   PRICE_LIMIT,
   BED_LIMIT,
   ROOM_LIMIT,
+  PROPERTY_STATUS,
 } from "@/enums/property";
 import { PROPERTY_STATUSES, RECOMMENDATIONS_LIMIT } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
@@ -115,4 +116,21 @@ export const generatePropertyFilterQuery = (filters: PropertyFilters) => {
 export const processPageQueryParam = (page?: string) => {
   if (!page || Number.isNaN(+page)) return 1;
   return +page;
+};
+
+export const changePropertyStatus = async (
+  propertyId: string,
+  status: PROPERTY_STATUS,
+) => {
+  const property = await Property.findByIdAndUpdate(
+    propertyId,
+    {
+      status,
+    },
+    {
+      new: true,
+    },
+  );
+
+  return property;
 };
