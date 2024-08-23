@@ -19,7 +19,6 @@ export const AgreementCommonFields = {
   },
   status: {
     type: String,
-    required: true,
     enum: {
       values: Object.values(AGREEMENT_STATUS),
     },

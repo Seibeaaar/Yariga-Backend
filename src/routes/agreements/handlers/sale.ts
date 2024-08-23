@@ -124,6 +124,7 @@ export const handleSaleAgreementDelete = async (
 
     await changePropertyStatus(property, PROPERTY_STATUS.Free);
     res.status(200).send(`Agreement ${id} successfully deleted.`);
+    res.locals.property = property;
     next();
   } catch (e) {
     res.status(500).send(generateErrorMesaage(e));

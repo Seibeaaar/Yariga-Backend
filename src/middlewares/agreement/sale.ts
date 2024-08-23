@@ -26,9 +26,7 @@ export const validateSaleAgreementInfo = async (
   try {
     const { buyer, seller, property } = req.body;
     const propertyDoc = await checkIfPropertyExists(property);
-    res.locals = {
-      property: propertyDoc,
-    };
+    res.locals.property = propertyDoc;
     await validateSidesOfAgreement(buyer, seller);
 
     next();
@@ -45,10 +43,7 @@ export const checkSaleAgreementIdParam = async (
 ) => {
   try {
     const agreement = await SaleAgreement.findById(req.params.id);
-    res.locals = {
-      ...res.locals,
-      agreement,
-    };
+    res.locals.agreement = agreement;
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
