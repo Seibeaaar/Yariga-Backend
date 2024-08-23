@@ -14,6 +14,11 @@ import {
   BED_LIMIT,
 } from "@/enums/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
+import {
+  AGREEMENT_TYPE,
+  PAYMENT_PERIOD,
+  RENT_PERIOD_TIMEFRAME,
+} from "@/enums/agreement";
 
 export const PROPERTY_VALIDATION_SCHEMA = yup.object({
   title: yup.string().required("Property title required"),
@@ -75,6 +80,21 @@ export const PROPERTY_VALIDATION_SCHEMA = yup.object({
       : schema;
   }),
   facilities: yup.array().ensure().of(yup.string().oneOf(PROPERTY_FACILITIES)),
+  paymentPeriod: yup
+    .string()
+    .required("Payment period required")
+    .oneOf(Object.values(PAYMENT_PERIOD), "Invalid payment period"),
+  minimumRentPeriod: yup.object().when("agreementType", ([type], schema) => {
+    return type === AGREEMENT_TYPE.Rent
+      ? schema.shape({
+          period: yup
+            .string()
+            .required()
+            .oneOf(Object.values(RENT_PERIOD_TIMEFRAME)),
+          value: yup.number().required(),
+        })
+      : schema;
+  }),
 });
 
 export const validateDescription = (v: string) => v.trim().length >= 100;

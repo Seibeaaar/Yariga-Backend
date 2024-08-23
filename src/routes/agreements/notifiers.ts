@@ -26,20 +26,20 @@ export const notifyAgreementCreated = async (req: Request, res: Response) => {
       receiver,
     );
   } catch (e) {
-    res.status(500).send(generateErrorMesaage(e));
+    console.log(generateErrorMesaage(e));
   }
 };
 
 export const notifyAgreementUpdated = async (req: Request, res: Response) => {
   try {
-    const { sale, property, profile } = res.locals;
+    const { agreement, property, profile } = res.locals;
 
     const content = constructAgreementNotification(
       NOTIFICATION_TYPE.AgreementCreate,
       property.title,
     );
 
-    const receiver = getAgreementCounterpart(sale, profile.id);
+    const receiver = getAgreementCounterpart(agreement, profile.id);
 
     await sendNotification(
       content,
@@ -48,20 +48,20 @@ export const notifyAgreementUpdated = async (req: Request, res: Response) => {
       receiver,
     );
   } catch (e) {
-    res.status(500).send(generateErrorMesaage(e));
+    console.log(generateErrorMesaage(e));
   }
 };
 
 export const notifyAgreementAccepted = async (req: Request, res: Response) => {
   try {
-    const { sale, profile, property } = res.locals;
+    const { agreement, profile, property } = res.locals;
 
     const content = constructAgreementNotification(
       NOTIFICATION_TYPE.AgreementSuccess,
       property.title,
     );
 
-    const receiver = getAgreementCounterpart(sale, profile.id);
+    const receiver = getAgreementCounterpart(agreement, profile.id);
 
     await sendNotification(
       content,
@@ -70,20 +70,20 @@ export const notifyAgreementAccepted = async (req: Request, res: Response) => {
       receiver,
     );
   } catch (e) {
-    res.status(500).send(generateErrorMesaage(e));
+    console.log(generateErrorMesaage(e));
   }
 };
 
 export const notifyAgreementCanceled = async (req: Request, res: Response) => {
   try {
-    const { sale, profile, property } = res.locals;
+    const { agreement, profile, property } = res.locals;
 
     const content = constructAgreementNotification(
       NOTIFICATION_TYPE.AgreementCancel,
       property.title,
     );
 
-    const receiver = getAgreementCounterpart(sale, profile.id);
+    const receiver = getAgreementCounterpart(agreement, profile.id);
 
     await sendNotification(
       content,
@@ -92,20 +92,20 @@ export const notifyAgreementCanceled = async (req: Request, res: Response) => {
       receiver,
     );
   } catch (e) {
-    res.status(500).send(generateErrorMesaage(e));
+    console.log(generateErrorMesaage(e));
   }
 };
 
 export const notifyAgreementCompleted = async (req: Request, res: Response) => {
   try {
-    const { sale, profile, property } = res.locals;
+    const { agreement, profile, property } = res.locals;
 
     const content = constructAgreementNotification(
       NOTIFICATION_TYPE.PaymentSucces,
       property.title,
     );
 
-    const receiver = getAgreementCounterpart(sale, profile.id);
+    const receiver = getAgreementCounterpart(agreement, profile.id);
 
     await sendNotification(
       content,
@@ -114,6 +114,6 @@ export const notifyAgreementCompleted = async (req: Request, res: Response) => {
       receiver,
     );
   } catch (e) {
-    res.status(500).send(generateErrorMesaage(e));
+    console.log(generateErrorMesaage(e));
   }
 };
