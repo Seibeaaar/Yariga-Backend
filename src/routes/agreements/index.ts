@@ -9,6 +9,7 @@ import {
   handleSaleAgreementDecline,
   handleSaleAgreementUpdate,
   handleSaleAgreementDelete,
+  handleGetSaleAgreements,
 } from "./handlers/sale";
 
 import {
@@ -35,9 +36,24 @@ import {
   handleRentAgreementDecline,
   handleRentAgreementDelete,
   handleRentAgreementUpdate,
+  handleGetRentAgreements,
 } from "./handlers/rent";
 
 const AgreementRouter = Router();
+
+AgreementRouter.get(
+  "/sale",
+  verifyJWToken,
+  extractProfileFromToken,
+  handleGetSaleAgreements,
+);
+
+AgreementRouter.get(
+  "/rent",
+  verifyJWToken,
+  extractProfileFromToken,
+  handleGetRentAgreements,
+);
 
 AgreementRouter.post(
   "/sale/create",

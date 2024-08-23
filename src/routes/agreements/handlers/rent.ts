@@ -4,8 +4,36 @@ import { AGREEMENT_STATUS } from "@/enums/agreement";
 import { PROPERTY_STATUS } from "@/enums/property";
 import RentAgreement from "@/models/Agreement/RentAgreement";
 import { generateErrorMesaage } from "@/utils/common";
+import { AGREEMENT_PAGE_LIMIT } from "@/constants/agreement";
 
 import { changePropertyStatus } from "@/utils/property";
+import { processPageQueryParam } from "@/utils/common";
+import { USER_ROLE } from "@/enums/user";
+
+export const handleGetRentAgreements = async (req: Request, res: Response) => {
+  try {
+    const { page } = req.query;
+    const { profile } = res.locals;
+    const pageNumber = processPageQueryParam(page as string | undefined);
+
+    const startIndex = (pageNumber - 1) * AGREEMENT_PAGE_LIMIT;
+    const results = await RentAgreement.find({
+      [profile.role === USER_ROLE.Landlord ? "seller" : "buyer"]: profile.id,
+    })
+      .skip(startIndex)
+      .limit(AGREEMENT_PAGE_LIMIT);
+    const total = results.length;
+
+    res.status(200).send({
+      properties: results,
+      total,
+      page: pageNumber,
+      pages: Math.ceil(total / AGREEMENT_PAGE_LIMIT),
+    });
+  } catch (e) {
+    res.status(500).send(generateErrorMesaage(e));
+  }
+};
 
 export const handleRentAgreementCreation = async (
   req: Request,
