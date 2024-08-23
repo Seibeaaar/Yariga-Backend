@@ -17,15 +17,17 @@ export const handleGetRentAgreements = async (req: Request, res: Response) => {
     const pageNumber = processPageQueryParam(page as string | undefined);
 
     const startIndex = (pageNumber - 1) * AGREEMENT_PAGE_LIMIT;
-    const results = await RentAgreement.find({
+
+    const query = RentAgreement.find({
       [profile.role === USER_ROLE.Landlord ? "seller" : "buyer"]: profile.id,
-    })
-      .skip(startIndex)
-      .limit(AGREEMENT_PAGE_LIMIT);
-    const total = results.length;
+    });
+
+    const results = await query.skip(startIndex).limit(AGREEMENT_PAGE_LIMIT);
+
+    const total = await query.countDocuments();
 
     res.status(200).send({
-      properties: results,
+      agreements: results,
       total,
       page: pageNumber,
       pages: Math.ceil(total / AGREEMENT_PAGE_LIMIT),
