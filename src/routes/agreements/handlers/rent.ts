@@ -6,10 +6,6 @@ import RentAgreement from "@/models/Agreement/RentAgreement";
 import { generateErrorMesaage } from "@/utils/common";
 
 import { changePropertyStatus } from "@/utils/property";
-import {
-  addAgreementsToCounterparts,
-  removeAgreementsForCounterparts,
-} from "@/utils/agreement";
 
 export const handleRentAgreementCreation = async (
   req: Request,
@@ -23,9 +19,6 @@ export const handleRentAgreementCreation = async (
     });
     await agreement.save();
 
-    const { seller, buyer, id } = agreement;
-
-    await addAgreementsToCounterparts(buyer, seller, id);
     res.status(201).send(agreement);
     res.locals.agreement = agreement;
     next();
@@ -98,12 +91,11 @@ export const handleRentAgreementDelete = async (
 ) => {
   try {
     const {
-      agreement: { id, property, seller, buyer },
+      agreement: { id, property },
     } = res.locals;
     await RentAgreement.findByIdAndDelete(id);
 
     await changePropertyStatus(property, PROPERTY_STATUS.Free);
-    await removeAgreementsForCounterparts(buyer, seller, id);
 
     res.status(200).send(`Agreement ${id} successfully deleted.`);
     next();

@@ -21,46 +21,11 @@ export const checkIfPropertyExists = async (id: string) => {
   return existingProperty;
 };
 
-export const getPropertyRecommendations = async (
-  filters: PropertyFilters,
-  landlords: string[],
-) => {
+export const getPropertyRecommendations = async (filters: PropertyFilters) => {
   const queryByFilters = generatePropertyFilterQuery(filters);
   const recommendations = await Property.aggregate([
     {
-      $facet: {
-        landlordsProperties: [
-          {
-            $match: {
-              owner: { $in: landlords },
-              ...queryByFilters,
-            },
-          },
-          {
-            $addFields: { sortBy: 0 },
-          },
-        ],
-        others: [
-          {
-            $match: {
-              owner: { $nin: landlords },
-              ...queryByFilters,
-            },
-          },
-          { $sort: { sortBy: -1 } },
-        ],
-      },
-    },
-    {
-      $project: {
-        properties: { $concatArrays: ["$landlordsProperties", "$others"] },
-      },
-    },
-    {
-      $unwind: "$properties",
-    },
-    {
-      $replaceRoot: { newRoot: "$properties" },
+      $match: queryByFilters,
     },
     {
       $sort: { "properties.rating": -1 },

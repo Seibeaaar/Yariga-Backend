@@ -6,10 +6,6 @@ import SaleAgreement from "@/models/Agreement/SaleAgreement";
 import { generateErrorMesaage } from "@/utils/common";
 
 import { changePropertyStatus } from "@/utils/property";
-import {
-  addAgreementsToCounterparts,
-  removeAgreementsForCounterparts,
-} from "@/utils/agreement";
 
 export const handleSaleAgreementCreation = async (
   req: Request,
@@ -22,10 +18,6 @@ export const handleSaleAgreementCreation = async (
       status: AGREEMENT_STATUS.Pending,
     });
     await agreement.save();
-
-    const { seller, buyer, id } = agreement;
-
-    await addAgreementsToCounterparts(buyer, seller, id);
     res.status(201).send(agreement);
     res.locals.agreement = agreement;
     next();
@@ -98,13 +90,11 @@ export const handleSaleAgreementDelete = async (
 ) => {
   try {
     const {
-      agreement: { id, property, seller, buyer },
+      agreement: { id, property },
     } = res.locals;
     await SaleAgreement.findByIdAndDelete(id);
 
     await changePropertyStatus(property, PROPERTY_STATUS.Free);
-    await removeAgreementsForCounterparts(buyer, seller, id);
-
     res.status(200).send(`Agreement ${id} successfully deleted.`);
     next();
   } catch (e) {

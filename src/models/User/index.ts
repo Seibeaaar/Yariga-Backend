@@ -71,15 +71,6 @@ const UserSchema = new Schema({
       values: Object.values(USER_ROLE),
     },
   },
-  agreements: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Agreement",
-      },
-    ],
-    default: undefined,
-  },
   ...RoleBasedFields,
 });
 
