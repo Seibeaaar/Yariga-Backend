@@ -1,19 +1,26 @@
 import { Request, Response, NextFunction } from "express";
+import Agreement from "@/models/Agreement";
 import {
   validateAgreementEndDate,
+  validateAgreementStartDate,
   validateSidesOfAgreement,
 } from "@/validators/agreement";
-import RentAgreement from "@/models/Agreement/RentAgreement";
 import { generateErrorMesaage } from "@/utils/common";
+import { checkIfAgreementExists } from "@/utils/agreement";
 import { checkIfPropertyExists } from "@/utils/property";
 
-export const validateRentAgreementBody = async (
+/**
+ * Checks request body if it includes required fields
+ * Checks a validity of start and end dates of a sale
+ * @throws Bad Request if an error occurs
+ */
+export const validateAgreementBody = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    await RentAgreement.validate(req.body);
+    await Agreement.validate(req.body);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
@@ -21,19 +28,20 @@ export const validateRentAgreementBody = async (
   }
 };
 
-export const validateRentAgreementInfo = async (
+export const validateAgreementInfo = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { buyer, seller, property, endDate, startDate } = req.body;
+    const { endDate, startDate, type, property, buyer, seller } = req.body;
     const propertyDoc = await checkIfPropertyExists(property);
     res.locals = {
       property: propertyDoc,
     };
     await validateSidesOfAgreement(buyer, seller);
-    await validateAgreementEndDate(startDate, endDate);
+    validateAgreementStartDate(startDate);
+    validateAgreementEndDate(startDate, type, endDate);
     next();
   } catch (e) {
     const message = generateErrorMesaage(e);
@@ -41,16 +49,21 @@ export const validateRentAgreementInfo = async (
   }
 };
 
-export const checkRentAgreementIdParam = async (
+/**
+ * Checks if ID is passed as a req param
+ * Checks if a sale with the id exists and passes it in locals
+ * @throws Bad Request in case of error
+ */
+export const checkAgreementIdParam = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const agreement = await RentAgreement.findById(req.params.id);
+    const sale = await checkIfAgreementExists(req.params.id);
     res.locals = {
       ...res.locals,
-      agreement,
+      sale,
     };
     next();
   } catch (e) {

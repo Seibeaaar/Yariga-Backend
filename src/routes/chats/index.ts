@@ -3,7 +3,7 @@ import Chat from "@/models/Chat";
 
 import { verifyJWToken, extractProfileFromToken } from "@/middlewares/token";
 import { generateErrorMesaage } from "@/utils/common";
-import { validateChatInRequest } from "@/middlewares/chats";
+import { checkCanCreateChat, validateChatInRequest } from "@/middlewares/chats";
 import { validateMessage } from "@/middlewares/messages";
 import {
   handleChatCreate,
@@ -41,6 +41,7 @@ ChatRouter.post(
   "/create",
   verifyJWToken,
   extractProfileFromToken,
+  checkCanCreateChat,
   validateMessage,
   handleChatCreate,
   notifyChatCreated,
