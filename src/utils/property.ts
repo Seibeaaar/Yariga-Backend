@@ -6,7 +6,6 @@ import {
   PRICE_LIMIT,
   BED_LIMIT,
   ROOM_LIMIT,
-  PROPERTY_STATUS,
 } from "@/enums/property";
 import { PROPERTY_STATUSES, RECOMMENDATIONS_LIMIT } from "@/constants/property";
 import { AGREEMENT_TYPES } from "@/constants/agreement";
@@ -21,11 +20,46 @@ export const checkIfPropertyExists = async (id: string) => {
   return existingProperty;
 };
 
-export const getPropertyRecommendations = async (filters: PropertyFilters) => {
+export const getPropertyRecommendations = async (
+  filters: PropertyFilters,
+  landlords: string[],
+) => {
   const queryByFilters = generatePropertyFilterQuery(filters);
   const recommendations = await Property.aggregate([
     {
-      $match: queryByFilters,
+      $facet: {
+        landlordsProperties: [
+          {
+            $match: {
+              owner: { $in: landlords },
+              ...queryByFilters,
+            },
+          },
+          {
+            $addFields: { sortBy: 0 },
+          },
+        ],
+        others: [
+          {
+            $match: {
+              owner: { $nin: landlords },
+              ...queryByFilters,
+            },
+          },
+          { $sort: { sortBy: -1 } },
+        ],
+      },
+    },
+    {
+      $project: {
+        properties: { $concatArrays: ["$landlordsProperties", "$others"] },
+      },
+    },
+    {
+      $unwind: "$properties",
+    },
+    {
+      $replaceRoot: { newRoot: "$properties" },
     },
     {
       $sort: { "properties.rating": -1 },
@@ -81,21 +115,4 @@ export const generatePropertyFilterQuery = (filters: PropertyFilters) => {
 export const processPageQueryParam = (page?: string) => {
   if (!page || Number.isNaN(+page)) return 1;
   return +page;
-};
-
-export const changePropertyStatus = async (
-  propertyId: string,
-  status: PROPERTY_STATUS,
-) => {
-  const property = await Property.findByIdAndUpdate(
-    propertyId,
-    {
-      status,
-    },
-    {
-      new: true,
-    },
-  );
-
-  return property;
 };

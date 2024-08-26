@@ -4,6 +4,15 @@ import ClientPreferencesSchema from "./ClientPreferences";
 import { USER_ROLE } from "@/enums/user";
 
 const RoleBasedFields = {
+  agreements: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Agreement",
+      },
+    ],
+    default: undefined,
+  },
   properties: {
     type: [
       {
@@ -13,6 +22,7 @@ const RoleBasedFields = {
     ],
     default: undefined,
   },
+  taxNumber: String,
   clients: {
     type: [
       {

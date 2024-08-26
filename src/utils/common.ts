@@ -6,8 +6,3 @@ export const generateErrorMesaage = (e: unknown) => {
   }
   return COMMON_SERVER_ERROR;
 };
-
-export const processPageQueryParam = (page?: string) => {
-  if (!page || Number.isNaN(+page)) return 1;
-  return +page;
-};

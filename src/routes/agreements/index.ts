@@ -1,17 +1,16 @@
 import { Router } from "express";
+
+import Agreement from "@/models/Agreement";
+import {
+  validateAgreementBody,
+  checkAgreementIdParam,
+  validateAgreementInfo,
+} from "@/middlewares/agreement";
 import { checkIfLandlord, checkIfClient } from "@/middlewares/profile";
 import { extractProfileFromToken, verifyJWToken } from "@/middlewares/token";
+import { generateErrorMesaage } from "@/utils/common";
 
-import {
-  handleSaleAgreementCreation,
-  handleSaleAgreementAccept,
-  handleSaleAgreementComplete,
-  handleSaleAgreementDecline,
-  handleSaleAgreementUpdate,
-  handleSaleAgreementDelete,
-  handleGetSaleAgreements,
-} from "./handlers/sale";
-
+import { handleAgreementCreation, handleAgreementUpdate } from "./handlers";
 import {
   notifyAgreementCreated,
   notifyAgreementAccepted,
@@ -19,159 +18,77 @@ import {
   notifyAgreementCompleted,
   notifyAgreementUpdated,
 } from "./notifiers";
-import {
-  validateSaleAgreementBody,
-  validateSaleAgreementInfo,
-  checkSaleAgreementIdParam,
-} from "@/middlewares/agreement/sale";
-import {
-  checkRentAgreementIdParam,
-  validateRentAgreementBody,
-  validateRentAgreementInfo,
-} from "@/middlewares/agreement/rent";
-import {
-  handleRentAgreementAccept,
-  handleRentAgreementComplete,
-  handleRentAgreementCreation,
-  handleRentAgreementDecline,
-  handleRentAgreementDelete,
-  handleRentAgreementUpdate,
-  handleGetRentAgreements,
-} from "./handlers/rent";
 
 const AgreementRouter = Router();
 
 AgreementRouter.get(
-  "/sale",
+  "/",
   verifyJWToken,
   extractProfileFromToken,
-  handleGetSaleAgreements,
-);
-
-AgreementRouter.get(
-  "/rent",
-  verifyJWToken,
-  extractProfileFromToken,
-  handleGetRentAgreements,
+  async (req, res) => {
+    try {
+      const { profile } = res.locals;
+      const agreements = await Agreement.findById(profile.id);
+      res.status(200).send(agreements);
+    } catch (e) {
+      res.status(500).send(generateErrorMesaage(e));
+    }
+  },
 );
 
 AgreementRouter.post(
-  "/sale/create",
+  "/create",
   verifyJWToken,
   extractProfileFromToken,
   checkIfClient,
-  validateSaleAgreementBody,
-  validateSaleAgreementInfo,
-  handleSaleAgreementCreation,
+  validateAgreementBody,
+  validateAgreementInfo,
+  handleAgreementCreation,
   notifyAgreementCreated,
 );
 
 AgreementRouter.put(
-  "/sale/:id/update",
+  "/update/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkSaleAgreementIdParam,
-  validateSaleAgreementBody,
-  validateSaleAgreementInfo,
-  handleSaleAgreementUpdate,
+  checkAgreementIdParam,
+  validateAgreementBody,
+  validateAgreementInfo,
+  handleAgreementUpdate,
   notifyAgreementUpdated,
 );
 
 AgreementRouter.put(
-  "/sale/:id/accept",
+  "/accept/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkSaleAgreementIdParam,
-  handleSaleAgreementAccept,
+  checkAgreementIdParam,
   notifyAgreementAccepted,
 );
 
 AgreementRouter.delete(
-  "/sale/:id/delete",
+  "/delete/:id",
   verifyJWToken,
   extractProfileFromToken,
   checkIfClient,
-  checkSaleAgreementIdParam,
-  handleSaleAgreementDelete,
+  checkAgreementIdParam,
   notifyAgreementCanceled,
 );
 
 AgreementRouter.put(
-  "/sale/:id/decline",
+  "/decline/:id",
   verifyJWToken,
   extractProfileFromToken,
-  checkSaleAgreementIdParam,
-  handleSaleAgreementDecline,
+  checkAgreementIdParam,
   notifyAgreementCanceled,
 );
 
 AgreementRouter.post(
-  "/sale/:id/complete",
+  "/complete/:id",
   verifyJWToken,
   extractProfileFromToken,
   checkIfLandlord,
-  checkSaleAgreementIdParam,
-  handleSaleAgreementComplete,
-  notifyAgreementCompleted,
-);
-
-AgreementRouter.post(
-  "/rent/create",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkIfClient,
-  validateRentAgreementBody,
-  validateRentAgreementInfo,
-  handleRentAgreementCreation,
-  notifyAgreementCreated,
-);
-
-AgreementRouter.put(
-  "/rent/:id/update",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkRentAgreementIdParam,
-  validateRentAgreementBody,
-  validateRentAgreementInfo,
-  handleRentAgreementUpdate,
-  notifyAgreementUpdated,
-);
-
-AgreementRouter.put(
-  "/rent/:id/accept",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkRentAgreementIdParam,
-  handleRentAgreementAccept,
-  notifyAgreementAccepted,
-);
-
-AgreementRouter.delete(
-  "/rent/:id/delete",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkIfClient,
-  checkRentAgreementIdParam,
-  handleRentAgreementDelete,
-  notifyAgreementCanceled,
-);
-
-AgreementRouter.put(
-  "/rent/:id/decline",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkRentAgreementIdParam,
-  handleRentAgreementDecline,
-  notifyAgreementCanceled,
-);
-
-AgreementRouter.post(
-  "/rent/:id/complete",
-  verifyJWToken,
-  extractProfileFromToken,
-  checkIfLandlord,
-  checkRentAgreementIdParam,
-  handleRentAgreementComplete,
+  checkAgreementIdParam,
   notifyAgreementCompleted,
 );
 

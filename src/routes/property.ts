@@ -19,6 +19,7 @@ import {
   getPropertyRecommendations,
   processPageQueryParam,
 } from "@/utils/property";
+import Agreement from "@/models/Agreement";
 import { PROPERTY_ITEMS_LIMIT } from "@/constants/property";
 
 const PropertyRouter = Router();
@@ -176,10 +177,20 @@ PropertyRouter.get(
   async (req, res) => {
     try {
       const {
-        profile: { preferences },
+        profile: { preferences, agreements },
       } = res.locals;
 
-      const results = await getPropertyRecommendations(preferences);
+      const agreementDocs = await Agreement.find({
+        _id: {
+          $in: agreements,
+        },
+      });
+
+      const previousLandlords = agreementDocs.map((a) => a.seller.toString());
+      const results = await getPropertyRecommendations(
+        preferences,
+        previousLandlords,
+      );
 
       res.status(200).send(results);
     } catch (e) {
